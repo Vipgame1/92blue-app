@@ -12,7 +12,7 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:Roboto,-apple-system,"Segoe UI",Arial,sans-serif;-webkit-tap-highlight-color:transparent}
 body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 .app{width:100%;max-width:412px;background:#f2f3f4;position:relative;min-height:100vh;padding-bottom:30px;overflow:hidden}
-.top{background:linear-gradient(180deg,#18b688 0%,#10a277 75%,#f2f3f4 100%);padding-bottom:12px;border-radius:0 0 20px 20px}
+.top{background:linear-gradient(180deg,#2563eb 0%,#1d4ed8 75%,#f2f3f4 100%);padding-bottom:12px;border-radius:0 0 20px 20px}
 .header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;color:#fff}
 .logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:6px}
 .header .icons i{margin-left:14px;font-size:18px}
@@ -23,17 +23,17 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 .wbtns{display:flex;gap:12px}
 .wbtns button{flex:1;padding:10px;border-radius:25px;border:none;color:#fff;font-weight:700;font-size:15px}
 .ann{background:#fff;margin:12px;border-radius:20px;padding:6px 12px;display:flex;align-items:center;font-size:12px;gap:8px}
-.ann i{color:#18b688;font-size:15px}
+.ann i{color:#2563eb;font-size:15px}
 .ann .mq{flex:1;overflow:hidden;white-space:nowrap;color:#555}
 .ann .mq span{display:inline-block;padding-left:100%;animation:mq 14s linear infinite}
 @keyframes mq{to{transform:translateX(-100%)}}
-.ann button{background:#18b688;color:#fff;border:none;padding:5px 14px;border-radius:15px;font-size:12px}
+.ann button{background:#2563eb;color:#fff;border:none;padding:5px 14px;border-radius:15px;font-size:12px}
 .modes{display:flex;background:#fff;margin:0 12px 12px;border-radius:14px;padding:6px}
 .mode{flex:1;text-align:center;padding:8px 2px;border-radius:10px;font-size:12px;color:#8a8f94;cursor:pointer;line-height:1.3}
-.mode.on{background:#18b688;color:#fff;font-weight:700}
+.mode.on{background:#2563eb;color:#fff;font-weight:700}
 .mode .ci{background:#f0f2f5;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-size:16px;color:#666}
-.mode.on .ci{background:#41d2a8;color:#fff}
-.board{background:linear-gradient(135deg,#18b688,#0e966e);margin:0 12px 12px;border-radius:16px;padding:14px 16px;color:#fff;display:flex;position:relative}
+.mode.on .ci{background:#4b83eb;color:#fff}
+.board{background:linear-gradient(135deg,#2563eb,#1d4ed8);margin:0 12px 12px;border-radius:16px;padding:14px 16px;color:#fff;display:flex;position:relative}
 .board::after{content:'';position:absolute;left:48%;top:12%;bottom:12%;border-left:1.5px dashed rgba(255,255,255,.35)}
 .lp{flex:1.1;padding-right:8px}.rp{flex:.9;text-align:right;display:flex;flex-direction:column;justify-content:center}
 .how{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.8);border-radius:15px;padding:3px 10px;font-size:11px;margin-bottom:10px;background:rgba(255,255,255,.1);cursor:pointer}
@@ -42,7 +42,7 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 .mini{width:25px;height:25px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
 .tl{font-size:13px;font-weight:600;margin-bottom:4px}
 .tm{display:flex;justify-content:flex-end;align-items:center;gap:3px;font-size:22px;font-weight:700}
-.tb{background:#fff;color:#18b688;width:24px;height:32px;line-height:32px;text-align:center;border-radius:5px;font-family:Roboto,monospace}
+.tb{background:#fff;color:#2563eb;width:24px;height:32px;line-height:32px;text-align:center;border-radius:5px;font-family:Roboto,monospace}
 .iss{font-size:11px;margin-top:8px;font-family:monospace}
 .card{background:#fff;margin:0 12px 14px;border-radius:14px;padding:8px 6px 12px}
 .zone{position:relative}
@@ -59,17 +59,17 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 .mrow{display:flex;gap:4px;margin:0 6px 10px}
 .rnd{border:1px solid #e8575c;color:#e8575c;background:#fff;padding:0 12px;height:30px;border-radius:6px;font-size:13px}
 .mb{flex:1;min-width:0;height:30px;background:#f0f1f2;color:#7a8a8a;border:none;border-radius:6px;font-size:12px}
-.mb.on{background:#17b26a;color:#fff}
+.mb.on{background:#2563eb;color:#fff}
 .bs{display:flex;margin:0 17px;border-radius:18px;overflow:hidden}
 .bs button{flex:1;height:36px;border:none;color:#fff;font-size:18px;font-weight:500}
 .big{background:#fea84f}.small{background:#6ba6f2}
 .tabs{display:flex;gap:6px;margin:0 12px 14px}
 .tab{flex:1;text-align:center;padding:9px 4px;font-size:15px;color:#888;background:#fff;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.18);cursor:pointer}
-.tab.on{background:linear-gradient(90deg,#2bd4b0,#12a47c);color:#fff}
+.tab.on{background:linear-gradient(90deg,#4b83eb,#2563eb);color:#fff}
 .pane{display:none;margin:0 12px}.pane.on{display:block}
 table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 .hist{border-radius:6px 6px 0 0;overflow:hidden}
-.hist th{background:#019b77;color:#fff;padding:10px 4px;font-weight:600;font-size:14px}
+.hist th{background:#2563eb;color:#fff;padding:10px 4px;font-weight:600;font-size:14px}
 .hist td{padding:9px 4px;text-align:center;color:#222;height:38px}
 .hn{font-size:20px;font-weight:800}
 .g{color:#17b15e}.r{color:#fd565c}
@@ -78,7 +78,7 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin:0 3px}
 .d-green{background:#17b15e}.d-red{background:#fd565c}.d-violet{background:#d45cf0}
 .cbox{background:#fff;border-radius:8px;padding:10px;font-size:11px;color:#444}
-.chead{display:flex;background:#019b77;color:#fff;padding:8px;border-radius:6px;font-weight:700;margin-bottom:8px}
+.chead{display:flex;background:#2563eb;color:#fff;padding:8px;border-radius:6px;font-weight:700;margin-bottom:8px}
 .st td{padding:4px 1px;text-align:center;color:#666;font-size:11px}.st td:first-child{text-align:left;font-weight:600;color:#333;white-space:nowrap}
 .sc{width:16px;height:16px;border:1px solid #fd565c;color:#fd565c;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px}
 .cg{position:relative}
@@ -94,7 +94,7 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 #tsvg{position:absolute;top:0;left:0;pointer-events:none;z-index:1}
 .mine{padding:14px 4px 4px}
 .mhead{text-align:right;margin-bottom:6px}
-.det{display:inline-flex;align-items:center;gap:6px;border:1px solid #0a8f6e;color:#0a8f6e;border-radius:8px;padding:5px 12px;font-size:14px;background:#fff}
+.det{display:inline-flex;align-items:center;gap:6px;border:1px solid #2563eb;color:#2563eb;border-radius:8px;padding:5px 12px;font-size:14px;background:#fff}
 .det i{font-size:16px}
 .mi{padding:9px 0;border-bottom:1px solid #eee;cursor:pointer}
 .mr{display:flex;align-items:center;gap:12px}
@@ -109,7 +109,7 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 .ma{font-size:14px;margin-top:4px;text-align:center;font-weight:700}
 .mx{display:none;background:#f6f7f8;border-radius:8px;margin-top:8px;padding:8px 10px;font-size:12px;color:#555;line-height:1.7}
 .mi.open .mx{display:block}
-.more{width:100%;border:none;background:#fff;color:#0a8f6e;padding:12px;font-size:14px;font-weight:600;border-top:1px solid #eee;cursor:pointer}
+.more{width:100%;border:none;background:#fff;color:#2563eb;padding:12px;font-size:14px;font-weight:600;border-top:1px solid #eee;cursor:pointer}
 .empty{background:#fff;border-radius:12px;padding:30px;text-align:center;color:#999;font-size:13px}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:50}
 .ov.show{display:block}
@@ -131,9 +131,9 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(30,30,30,.88);color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;z-index:100;display:none}
 .mod{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:70;padding:20px}
 .mc{background:#fff;border-radius:16px;width:100%;max-width:350px;overflow:hidden}
-.mh{background:#18b688;color:#fff;text-align:center;padding:12px;font-weight:700}
+.mh{background:#2563eb;color:#fff;text-align:center;padding:12px;font-weight:700}
 .mbd{padding:16px;max-height:380px;overflow-y:auto;font-size:13px;color:#333;line-height:1.5}.mbd p{margin-bottom:10px}
-.mf{padding:12px;text-align:center}.mf button{background:#18b688;color:#fff;border:none;padding:10px 45px;border-radius:20px;font-weight:700;cursor:pointer}
+.mf{padding:12px;text-align:center}.mf button{background:#2563eb;color:#fff;border:none;padding:10px 45px;border-radius:20px;font-weight:700;cursor:pointer}
 .wp{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:90}
 .wp.show{display:flex}
 .wp canvas{position:absolute;inset:0;pointer-events:none}
@@ -154,7 +154,7 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 .wclose{margin:18px auto 0;display:block;background:#c4180d;color:#fff;border:2px solid #ffd54a;border-radius:22px;padding:11px 46px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .wclose:active{transform:scale(.96)}
 #authGate{position:fixed;inset:0;background:#f2f3f4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:9999;color:#0f1c3f;font:600 14px/1.5 system-ui}
-#authGate .sp{width:34px;height:34px;border:3px solid #e0e0e0;border-top-color:#18b688;border-radius:50%;animation:spn 1s linear infinite}
+#authGate .sp{width:34px;height:34px;border:3px solid #e0e0e0;border-top-color:#2563eb;border-radius:50%;animation:spn 1s linear infinite}
 @keyframes spn{100%{transform:rotate(360deg)}}
 </style>
 </head>
@@ -164,11 +164,14 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 
 <div class="app">
   <div class="top">
-    <div class="header"><i class="fa-solid fa-chevron-left"></i><div class="logo"><i class="fa-solid fa-circle-notch"></i> Fantasy Gems</div><div class="icons"><i class="fa-solid fa-headset"></i><i class="fa-solid fa-music"></i></div></div>
+    <div class="header">
+      <i class="fa-solid fa-chevron-left" onclick="location.href='../index.html'" style="cursor:pointer"></i>
+      <div class="logo"><i class="fa-solid fa-circle-notch"></i> 92Blue</div>
+    </div>
     <div class="wallet">
       <div class="balance"><span id="bal">Rs0.00</span> <i class="fa-solid fa-arrows-rotate" id="refresh"></i></div>
-      <div class="wlabel"><i class="fa-solid fa-wallet" style="color:#18b688"></i> Wallet balance</div>
-      <div class="wbtns"><button style="background:#ff4d5a" onclick="toast('Please use Profile > Withdraw')">Withdraw</button><button style="background:#18b688" onclick="toast('Please use Profile > Deposit')">Deposit</button></div>
+      <div class="wlabel"><i class="fa-solid fa-wallet" style="color:#2563eb"></i> Wallet balance</div>
+      <div class="wbtns"><button style="background:#ff4d5a" onclick="toast('Please use Profile > Withdraw')">Withdraw</button><button style="background:#2563eb" onclick="toast('Please use Profile > Deposit')">Deposit</button></div>
     </div>
   </div>
   <div class="ann"><i class="fa-solid fa-volume-high"></i><div class="mq"><span>Welcome to 92Blue, the most trusted and fastest site, you can play our game and Earn higher reward</span></div><button>Detail</button></div>
@@ -267,52 +270,86 @@ const FB_TS = firebase.database.ServerValue.TIMESTAMP;
 let USER_UID = null;
 let BALANCE = 0;
 
-async function fbDebit(amount, meta) {
+/* ============================================================
+   ADMIN OVERRIDE — Only for 3-minute mode (index 2)
+   ============================================================ */
+let ADMIN_OVERRIDES = {};
+
+function loadAdminOverrides() {
+  return fbDB.ref("wingo_results").once("value").then(function(snap) {
+    ADMIN_OVERRIDES = snap.val() || {};
+  }).catch(function() { ADMIN_OVERRIDES = {}; });
+}
+
+function getAdminOverride(modeIdx, period) {
+  if (modeIdx !== 2) return null;
+  const m = ADMIN_OVERRIDES["2"];
+  if (!m) return null;
+  const v = m[period];
+  if (v === undefined || v === null) return null;
+  const n = Number(v);
+  if (Number.isInteger(n) && n >= 0 && n <= 9) return n;
+  return null;
+}
+
+function watchAdminOverrides() {
+  fbDB.ref("wingo_results").on("value", function(snap) {
+    ADMIN_OVERRIDES = snap.val() || {};
+    if (typeof window.__wingoRerender === "function") {
+      try { window.__wingoRerender(); } catch(e) {}
+    }
+  });
+}
+
+/* ============================================================
+   BALANCE HELPERS
+============================================================ */
+function fbDebit(amount, meta) {
   meta = meta || {};
   amount = Number(amount);
-  if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid");
+  if (!Number.isFinite(amount) || amount <= 0) return Promise.reject(new Error("Invalid"));
   const ref = fbDB.ref("users/" + USER_UID + "/balance");
-  const res = await ref.transaction(function(cur) {
+  return ref.transaction(function(cur) {
     const b = Number(cur) || 0;
     const n = b - amount;
     if (n < 0) return;
     return n;
+  }).then(function(res) {
+    if (!res.committed) throw new Error("Insufficient balance");
+    const newBal = Number(res.snapshot.val()) || 0;
+    return fbDB.ref("transactions/" + USER_UID).push({
+      type: meta.type || "bet", amount: -amount, balanceAfter: newBal,
+      game: "wingo", note: meta.note || null, ts: FB_TS
+    }).then(function() { return newBal; });
   });
-  if (!res.committed) throw new Error("Insufficient balance");
-  const newBal = Number(res.snapshot.val()) || 0;
-  await fbDB.ref("transactions/" + USER_UID).push({
-    type: meta.type || "bet", amount: -amount, balanceAfter: newBal,
-    game: "wingo", note: meta.note || null, ts: FB_TS
-  });
-  return newBal;
 }
 
-async function fbCredit(amount, meta) {
+function fbCredit(amount, meta) {
   meta = meta || {};
   amount = Number(amount);
-  if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid");
+  if (!Number.isFinite(amount) || amount <= 0) return Promise.reject(new Error("Invalid"));
   const ref = fbDB.ref("users/" + USER_UID + "/balance");
-  const res = await ref.transaction(function(cur) { return (Number(cur) || 0) + amount; });
-  const newBal = Number(res.snapshot.val()) || 0;
-  await fbDB.ref("transactions/" + USER_UID).push({
-    type: meta.type || "win", amount: amount, balanceAfter: newBal,
-    game: "wingo", note: meta.note || null, ts: FB_TS
+  return ref.transaction(function(cur) { return (Number(cur) || 0) + amount; }).then(function(res) {
+    const newBal = Number(res.snapshot.val()) || 0;
+    return fbDB.ref("transactions/" + USER_UID).push({
+      type: meta.type || "win", amount: amount, balanceAfter: newBal,
+      game: "wingo", note: meta.note || null, ts: FB_TS
+    }).then(function() { return newBal; });
   });
-  return newBal;
 }
 
-async function fbLogBet(sel, amount, period) {
+function fbLogBet(modeIdx, sel, amount, period) {
   const ref = fbDB.ref("bettingHistory/" + USER_UID).push();
-  await ref.set({
-    game: "wingo", selection: String(sel), amount: amount, period: period,
-    status: "PENDING", payout: 0, ts: FB_TS
-  });
-  return ref.key;
-}
-
-async function fbUpdateBet(key, status, payout) {
-  if (!key) return;
-  await fbDB.ref("bettingHistory/" + USER_UID + "/" + key).update({ status: status, payout: payout || 0 });
+  return ref.set({
+    game: "wingo",
+    mode: modeIdx,
+    selection: String(sel),
+    amount: amount,
+    period: period,
+    status: "PENDING",
+    payout: 0,
+    ts: FB_TS
+  }).then(function() { return ref.key; });
 }
 
 /* ============================================================
@@ -337,12 +374,13 @@ fbAuth.onAuthStateChanged(async function(user) {
 
   fbDB.ref("users/" + USER_UID + "/balance").on("value", function(s) {
     BALANCE = Number(s.val()) || 0;
-    if (typeof balance !== "undefined") {
-      balance = BALANCE;
-      try { updBal(); } catch(e) {}
+    if (typeof window.__wingoBalanceUpdate === "function") {
+      try { window.__wingoBalanceUpdate(BALANCE); } catch(e) {}
     }
   });
 
+  await loadAdminOverrides();
+  watchAdminOverrides();
   startGame();
 });
 
@@ -409,31 +447,9 @@ function mult(sel,n){
   return n<=4?2:0;
 }
 
-function settle(m,p,n){
-  const mine=bets.filter(b=>b.mode===m&&b.p===p&&b.status==='pending');
-  if(!mine.length)return;
-  let total=0,win=0;
-  mine.forEach(b=>{
-    const x=mult(b.sel,n);
-    b.bonus=b.contract*x;
-    b.n=n;
-    b.status=x>0?'win':'lose';
-    total+=b.total;
-    win+=b.bonus;
-    if(b.fbKey) fbUpdateBet(b.fbKey, b.status === 'win' ? 'WIN' : 'LOSE', b.bonus);
-  });
-  if(win>0){
-    fbCredit(win, { type: 'win', note: 'WinGo period ' + p }).then(function(newBal){
-      balance = newBal;
-      updBal();
-    }).catch(function(){});
-  }
-  balance+=win;
-  updBal();
-  showWin(win>0,win>0?win:total,m,p,n);
-  renderMine();
-}
-
+/* ============================================================
+   RESULT RESOLVER
+   ============================================================ */
 function get30sResult(p){
   const salt='MKS-wingo-30s-v2|'+p;
   let h=1779033703^salt.length;
@@ -464,6 +480,13 @@ function getRandomResult(p, modeIndex){
   return (h>>>0)%10;
 }
 
+function resolveResult(modeIdx, period){
+  const adminN = getAdminOverride(modeIdx, period);
+  if (adminN !== null) return adminN;
+  if (modeIdx === 0) return get30sResult(period);
+  return getRandomResult(period, modeIdx);
+}
+
 function updateRandomMode(modeIndex){
   const i = modeIndex;
   const k = MODES[i].k * 1000;
@@ -473,7 +496,7 @@ function updateRandomMode(modeIndex){
   for(let step = 1; step <= 100; step++){
     const pastMs = curMs - (step * k);
     const p = pfAt(i, pastMs);
-    const n = (i === 0) ? get30sResult(p) : getRandomResult(p, i);
+    const n = resolveResult(i, p);
     list.push({p, n});
   }
   
@@ -483,7 +506,7 @@ function updateRandomMode(modeIndex){
 
   bets.filter(b => b.mode === i && b.status === 'pending').forEach(b => {
     const h = S[i].hist.find(x => x.p === b.p);
-    if(h) settle(i, h.p, h.n);
+    if(h) settle(i, h.p, h.n, false);
   });
 
   if(cur === i) renderAll();
@@ -531,7 +554,7 @@ async function fetchMode(i){
 
     bets.filter(b=>b.mode===i&&b.status==='pending').forEach(b=>{
       const h=st.hist.find(x=>x.p===b.p);
-      if(h)settle(i,h.p,h.n);
+      if(h)settle(i,h.p,h.n,false);
     });
 
     if(i===cur)renderAll();
@@ -539,6 +562,128 @@ async function fetchMode(i){
   finally{st.busy=false}
 }
 
+/* ============================================================
+   SETTLE — No local double modification
+   ============================================================ */
+function settle(m,p,n,fromAutoSettle){
+  const mine=bets.filter(b=>b.mode===m&&b.p===p&&b.status==='pending');
+  if(!mine.length)return;
+  let total=0,win=0;
+  mine.forEach(b=>{
+    const x=mult(b.sel,n);
+    const fee = Math.max(2, b.total * 0.02);
+    b.bonus = x > 0 ? (b.total * x) - fee : 0;
+    b.n=n;
+    b.status=x>0?'win':'lose';
+    total+=b.total;
+    win+=b.bonus;
+  });
+  mine.forEach(b => {
+    if(b.fbKey) settleBetAtomic(b.fbKey, n).catch(function(){});
+  });
+  if(!fromAutoSettle){
+    showWin(win>0, win>0 ? win : total, m, p, n);
+  }
+  renderMine();
+}
+
+/* ============================================================
+   SETTLE BET ATOMIC — With auto refresh after win
+   ============================================================ */
+async function settleBetAtomic(betKey, result){
+  if(!USER_UID) return;
+  const betRef = fbDB.ref("bettingHistory/" + USER_UID + "/" + betKey);
+  let payout = 0;
+  let wasSettled = false;
+
+  await betRef.transaction(function(bet){
+    if(!bet) return bet;
+    if(bet.status !== "PENDING") return;
+    const amt = Number(bet.amount) || 0;
+    const x = mult(bet.selection, result);
+    const fee = Math.max(2, amt * 0.02);
+    payout = x > 0 ? (amt * x) - fee : 0;
+    bet.status = x > 0 ? "WIN" : "LOSE";
+    bet.payout = payout;
+    bet.result = result;
+    bet.settledAt = Date.now();
+    wasSettled = true;
+    return bet;
+  });
+
+  if(wasSettled && payout > 0){
+    try {
+      await fbCredit(payout, { type: "win", note: "Wingo period settled" });
+      refreshBalanceFromFirebase();
+      setTimeout(refreshBalanceFromFirebase, 1000);
+      setTimeout(refreshBalanceFromFirebase, 2000);
+    } catch(e) {}
+  } else if(wasSettled){
+    refreshBalanceFromFirebase();
+  }
+}
+/* ============================================================
+   REFRESH BALANCE FROM FIREBASE
+   ============================================================ */
+async function refreshBalanceFromFirebase() {
+  if (!USER_UID) return;
+  try {
+    const snap = await fbDB.ref("users/" + USER_UID + "/balance").once("value");
+    const bal = Number(snap.val()) || 0;
+    BALANCE = bal;
+    balance = bal;
+    updBal();
+  } catch(e) {}
+}
+
+/* ============================================================
+   AUTO-SETTLE FROM FIREBASE
+   ============================================================ */
+async function autoSettleFromFirebase(){
+  if(!USER_UID) return;
+  try {
+    const snap = await fbDB.ref("bettingHistory/" + USER_UID).once("value");
+    const all = snap.val() || {};
+    const now = Date.now();
+    let anySettled = false;
+
+    for (const [fbKey, bet] of Object.entries(all)) {
+      if (!bet || bet.game !== "wingo") continue;
+      if (String(bet.status || "").toUpperCase() !== "PENDING") continue;
+
+      const modeIdx = Number(bet.mode !== undefined ? bet.mode : 0);
+      const period = String(bet.period || "");
+      if (!period) continue;
+
+      const currentPeriod = pfAt(modeIdx, now);
+      if (period >= currentPeriod) continue;
+
+      const n = resolveResult(modeIdx, period);
+      await settleBetAtomic(fbKey, n);
+      anySettled = true;
+
+      const localBet = bets.find(b => b.fbKey === fbKey);
+      if (localBet) {
+        const x = mult(localBet.sel, n);
+        localBet.status = x > 0 ? "win" : "lose";
+        localBet.bonus = localBet.contract * x;
+        localBet.n = n;
+      }
+    }
+
+    if (anySettled) {
+      saveAcc();
+      renderMine();
+      refreshBalanceFromFirebase();
+    }
+  } catch(e) {
+    console.error("[Wingo] autoSettle error:", e);
+  }
+}
+
+/* ============================================================
+   AUDIO
+   ============================================================ */
 let AC=null,lastBeep=0;
 function audio(){
   try{
@@ -617,6 +762,18 @@ function tick(){
 setInterval(tick,250);
 
 function updBal(){saveAcc();$('bal').textContent='Rs'+balance.toFixed(2)}
+
+window.__wingoBalanceUpdate = function(newBal) {
+  balance = newBal;
+  updBal();
+};
+
+window.__wingoRerender = function() {
+  if(cur === 2){
+    updateRandomMode(2);
+    renderAll();
+  }
+};
 
 function renderModes(){
   $('modes').innerHTML=MODES.map((m,i)=>`<div class="mode ${i===cur?'on':''}" data-i="${i}"><div class="ci"><i class="fa-regular fa-clock"></i></div>${m.lab}</div>`).join('');
@@ -718,6 +875,9 @@ const total=()=>sheet.base*sheet.qty*sheet.mult;
 function upd(){$('okBtn').textContent='Total amount Rs'+total().toFixed(2)}$('qm').onclick=()=>{sheet.qty=Math.max(1,sheet.qty-1);$('qin').value=sheet.qty;upd()};$('qp').onclick=()=>{sheet.qty++;$('qin').value=sheet.qty;upd()};$('qin').oninput=e=>{sheet.qty=Math.max(1,parseInt(e.target.value)||1);upd()};
 function closeSheet(){sheet=null;$('ov').classList.remove('show');$('sheet').classList.remove('show')}
 
+/* ============================================================
+   BET BUTTON — With 4x auto balance refresh
+   ============================================================ */
 $('okBtn').onclick=async()=>{
   if(!sheet)return;
   const rem=MODES[cur].k-Math.floor(secs()%MODES[cur].k);
@@ -726,22 +886,38 @@ $('okBtn').onclick=async()=>{
   if(t>balance)return toast('Insufficient balance');
   
   const period = pfAt(cur, nowMs());
+  const savedSel = sheet.sel;
+  const savedMode = cur;
   
+  let newBal;
   try {
-    await fbDebit(t, { type: 'bet', note: selName(sheet.sel) + ' ' + period });
+    newBal = await fbDebit(t, { type: 'bet', note: selName(savedSel) + ' ' + period });
   } catch(e) {
     return toast(e.message || 'Bet failed');
   }
   
   let fbKey = null;
-  try { fbKey = await fbLogBet(sheet.sel, t, period); } catch(e) {}
+  try { fbKey = await fbLogBet(savedMode, savedSel, t, period); } catch(e) {}
   
-  balance-=t;updBal();
-  bets.unshift({mode:cur,p:period,sel:sheet.sel,total:t,contract:t*0.98,status:'pending',bonus:0,t:Date.now(),n:null,fbKey:fbKey});
-  closeSheet();toast('Bet successful');renderMine();
+  balance = newBal;
+  updBal();
+  bets.unshift({
+    mode: savedMode, p: period, sel: savedSel, total: t,
+    contract: t*0.98, status: 'pending', bonus: 0,
+    t: Date.now(), n: null, fbKey: fbKey
+  });
+  closeSheet();
+  toast('Bet successful');
+  renderMine();
+  
+  // ✅ Auto refresh balance 4 times — fix double-cut
+  refreshBalanceFromFirebase();
+  setTimeout(refreshBalanceFromFirebase, 1000);
+  setTimeout(refreshBalanceFromFirebase, 2000);
+  setTimeout(refreshBalanceFromFirebase, 3000);
 };
 
-$('refresh').onclick=()=>{balance=BALANCE;updBal();toast('Balance refreshed')};
+$('refresh').onclick=()=>{refreshBalanceFromFirebase();toast('Balance refreshed')};
 
 function toast(msg){
   const t=$('toast');t.textContent=msg;t.style.display='block';
@@ -839,7 +1015,6 @@ function drawConfetti(){
   render();
 }
 
-/* ---------- Wire all buttons via addEventListener (no inline onclick) ---------- */
 $('btnGreen').onclick = ()=>openSheet('green');
 $('btnViolet').onclick = ()=>openSheet('violet');
 $('btnRed').onclick = ()=>openSheet('red');
@@ -853,13 +1028,17 @@ $('howClose').onclick = ()=>{ $('how').style.display = 'none'; };
 $('acToggle').onclick = toggleAutoClose;
 $('wCloseBtn').onclick = closeWin;
 
-/* ---------- Init ---------- */
 updBal();
 renderModes();
 renderAll();
 tick();
 update30sMode();
 MODES.forEach((_,i)=>fetchMode(i));
+
+setTimeout(autoSettleFromFirebase, 2000);
+setInterval(autoSettleFromFirebase, 8000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) autoSettleFromFirebase(); });
+window.addEventListener("focus", ()=>{ autoSettleFromFirebase(); });
 }
 </script>
 </body>
