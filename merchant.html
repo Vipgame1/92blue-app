@@ -199,6 +199,268 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 
 <div class="toast" id="toast"></div>
 
-<script> const firebaseConfig = { apiKey: "AIzaSyDAjCe1sI0wEW737ZbnTDGietZeSkHDtmw", authDomain: "sellershop-bda2e.firebaseapp.com", databaseURL: "https://sellershop-bda2e-default-rtdb.firebaseio.com", projectId: "sellershop-bda2e", storageBucket: "sellershop-bda2e.firebasestorage.app", messagingSenderId: "655043460897", appId: "1:655043460897:web:9285631e2752a80c83c860" }; if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.database(); const FB_TS = firebase.database.ServerValue.TIMESTAMP; const AMOUNTS = [300, 500, 1000, 3000, 5000, 10000]; const TIMER_MINUTES = 10; let currentUser = null; let userData = null; let selectedAmount = 0; let selectedQrConfig = null; let requestId = null; let expiresAt = null; let timerInterval = null; let statusTimerInterval = null; let qrConfigs = {}; let statusListener = null; const $ = (id) => document.getElementById(id); const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); function toast(msg) { const t = $("toast"); t.innerText = msg; t.className = "toast show"; clearTimeout(t._h); t._h = setTimeout(() => { t.className = "toast"; }, 2500); } // Safe redirect to avoid 404 function goHome() { try { if (statusListener) statusListener.off(); window.location.href = "../index.html"; } catch (e) { window.location.href = "/"; } } function renderAmountGrid() { $("amtGrid").innerHTML = AMOUNTS.map(a => `<button class=amt-btn data-amt="${a}" onclick="selectAmount(${a})">Rs ${a}</button>` ).join(""); } function selectAmount(amt) { selectedAmount = amt; $("amtInput").value = amt; document.querySelectorAll(".amt-btn").forEach(b => { b.classList.toggle("selected", Number(b.dataset.amt) === amt); }); checkAndShowQr(); } async function loadQrConfigs() { try { const snap = await db.ref("merchant_qr_config").once("value"); qrConfigs = snap.val() || {}; } catch (e) { qrConfigs = {}; } } function getQrForAmount(amt) { const amtKey = "amt_" + amt; if (qrConfigs[amtKey] && qrConfigs[amtKey].active !== false && qrConfigs[amtKey].imageUrl) { return qrConfigs[amtKey]; } if (qrConfigs.default && qrConfigs.default.active !== false && qrConfigs.default.imageUrl) { return qrConfigs.default; } return null; } function checkAndShowQr() { const amt = Number($("amtInput").value) || selectedAmount; if (!amt || amt < 1 || amt > 500000) { $("qrSection").classList.remove("show"); return; } selectedAmount = amt; selectedQrConfig = getQrForAmount(amt); if (!selectedQrConfig) { $("qrSection").classList.add("show"); $("qrContent").innerHTML = `<div class=qr-loading style="color:#dc2626">❌ No QR configured for this amount<br><small style=font-size:11px>Contact support</small></div>`; return; } $("qrSection").classList.add("show"); // Add Download Button with Image $("qrContent").innerHTML = ` <div class=qr-image><img src=${esc(selectedQrConfig.imageUrl)} alt="QR Code" crossorigin="anonymous"></div><a href=${esc(selectedQrConfig.imageUrl)} download="Payment_QR_${amt}.png" target="_blank" class="download-qr-btn"><i class="fa-solid fa-download"></i> Download QR </a><div class=qr-amount><small>Rs</small> ${amt.toLocaleString()}</div><div class=qr-note> ${selectedQrConfig.walletName ? esc(selectedQrConfig.walletName) : ""} </div> `; if (!expiresAt) startTimer(); } function startTimer() { expiresAt = Date.now() + (TIMER_MINUTES * 60 * 1000); updateTimerDisplay(); if (timerInterval) clearInterval(timerInterval); timerInterval = setInterval(updateTimerDisplay, 1000); } function updateTimerDisplay() { const left = expiresAt - Date.now(); const m = Math.floor(left / 60000); const s = Math.floor((left % 60000) / 1000); const timeStr = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0"); if ($("timerDisplay")) $("timerDisplay").innerText = timeStr; if ($("statusTimer")) $("statusTimer").innerText = timeStr; if (left <= 0) { clearInterval(timerInterval); if ($("timerDisplay")) $("timerDisplay").innerText = "00:00"; // If status is still waiting after 10 mins, auto redirect if ($("waitingScreen").classList.contains("show")) { toast("Time expired. Redirecting..."); setTimeout(goHome, 1500); } } } function submitPayment() { if (!selectedAmount || selectedAmount < 1) return toast("Please select amount"); const wallet = $("userWallet").value.trim(); if (!wallet || wallet.length < 10) return toast("Enter valid wallet number"); if (!/^\d+$/.test(wallet)) return toast("Only digits allowed"); if (!selectedQrConfig) return toast("QR not configured. Contact support."); const btn = $("submitBtn"); btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Submitting...'; const reqRef = db.ref("deposit_requests").push(); requestId = reqRef.key; const now = Date.now(); reqRef.set({ uid: currentUser.uid, publicUid: userData.publicUid || "", userName: userData.name || "", phone: userData.phone || "", amount: selectedAmount, method: "QR_PAYMENT", methodKey: "qr", qrConfig: selectedQrConfig, userWalletNumber: wallet, userConfirmed: true, userConfirmedAt: now, status: "pending", source: "merchant_qr", createdAt: now, expiresAt: expiresAt || (now + TIMER_MINUTES * 60 * 1000), approvedAt: null, rejectedAt: null, credited: false }).then(() => { // Hide form, show waiting screen $("paymentForm").style.display = "none"; $("waitingScreen").classList.add("show"); $("mainTitle").innerText = "Processing"; $("mainSubtitle").innerText = "Please wait a moment"; // Listen to Firebase Status listenToRequestStatus(); }).catch(e => { toast("Failed: " + e.message); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>I\'VE SENT THE PAYMENT'; }); } function listenToRequestStatus() { if (!requestId) return; if (statusListener) statusListener.off(); statusListener = db.ref("deposit_requests/" + requestId); statusListener.on("value", (snap) => { const data = snap.val(); if (!data) return; const status = (data.status || "").toLowerCase(); if (status === "approved") { clearInterval(timerInterval); clearInterval(statusTimerInterval); $("waitingScreen").classList.remove("show"); $("successScreen").classList.add("show"); $("successAmt").innerText = Number(data.amount).toLocaleString(); $("mainTitle").innerText = "Success"; $("mainSubtitle").innerText = "Payment confirmed"; } else if (status === "rejected") { clearInterval(timerInterval); clearInterval(statusTimerInterval); $("waitingScreen").classList.remove("show"); $("rejectedScreen").classList.add("show"); if (data.rejectReason) { $("rejectedReason").innerText = "Reason: " + data.rejectReason; } $("mainTitle").innerText = "Rejected"; $("mainSubtitle").innerText = "Payment declined"; } }); } // Live input monitoring $("amtInput").addEventListener("input", () => { const v = Number($("amtInput").value) || 0; selectedAmount = v; document.querySelectorAll(".amt-btn").forEach(b => b.classList.remove("selected")); if (v >= 1) checkAndShowQr(); else $("qrSection").classList.remove("show"); }); $("userWallet").addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 11); }); // Auth auth.onAuthStateChanged(async (user) => { if (!user) { goHome(); return; } const snap = await db.ref("users/" + user.uid).once("value"); const data = snap.val(); if (!data) { await auth.signOut(); goHome(); return; } if (data.status === "banned") { alert("Account banned"); await auth.signOut(); goHome(); return; } currentUser = user; userData = data; renderAmountGrid(); await loadQrConfigs(); $("loadingScreen").style.display = "none"; }); </script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDAjCe1sI0wEW737ZbnTDGietZeSkHDtmw",
+  authDomain: "sellershop-bda2e.firebaseapp.com",
+  databaseURL: "https://sellershop-bda2e-default-rtdb.firebaseio.com",
+  projectId: "sellershop-bda2e",
+  storageBucket: "sellershop-bda2e.firebasestorage.app",
+  messagingSenderId: "655043460897",
+  appId: "1:655043460897:web:9285631e2752a80c83c860"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const FB_TS = firebase.database.ServerValue.TIMESTAMP;
+
+const AMOUNTS = [300, 500, 1000, 3000, 5000, 10000];
+const TIMER_MINUTES = 10;
+
+let currentUser = null;
+let userData = null;
+let selectedAmount = 0;
+let selectedQrConfig = null;
+let requestId = null;
+let expiresAt = null;
+let timerInterval = null;
+let statusTimerInterval = null;
+let qrConfigs = {};
+let statusListener = null;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function toast(msg) {
+  const t = $("toast");
+  t.innerText = msg;
+  t.className = "toast show";
+  clearTimeout(t._h);
+  t._h = setTimeout(() => { t.className = "toast"; }, 2500);
+}
+
+// Safe redirect to avoid 404
+function goHome() {
+  try {
+    if (statusListener) statusListener.off();
+    window.location.href = "../index.html";
+  } catch (e) {
+    window.location.href = "/";
+  }
+}
+
+function renderAmountGrid() {
+  $("amtGrid").innerHTML = AMOUNTS.map(a => 
+    `<button class="amt-btn" data-amt="${a}" onclick="selectAmount(${a})">Rs ${a}</button>`
+  ).join("");
+}
+
+function selectAmount(amt) {
+  selectedAmount = amt;
+  $("amtInput").value = amt;
+  document.querySelectorAll(".amt-btn").forEach(b => {
+    b.classList.toggle("selected", Number(b.dataset.amt) === amt);
+  });
+  checkAndShowQr();
+}
+
+async function loadQrConfigs() {
+  try {
+    const snap = await db.ref("merchant_qr_config").once("value");
+    qrConfigs = snap.val() || {};
+  } catch (e) {
+    qrConfigs = {};
+  }
+}
+
+function getQrForAmount(amt) {
+  const amtKey = "amt_" + amt;
+  if (qrConfigs[amtKey] && qrConfigs[amtKey].active !== false && qrConfigs[amtKey].imageUrl) {
+    return qrConfigs[amtKey];
+  }
+  if (qrConfigs.default && qrConfigs.default.active !== false && qrConfigs.default.imageUrl) {
+    return qrConfigs.default;
+  }
+  return null;
+}
+
+function checkAndShowQr() {
+  const amt = Number($("amtInput").value) || selectedAmount;
+  if (!amt || amt < 1 || amt > 500000) {
+    $("qrSection").classList.remove("show");
+    return;
+  }
+
+  selectedAmount = amt;
+  selectedQrConfig = getQrForAmount(amt);
+
+  if (!selectedQrConfig) {
+    $("qrSection").classList.add("show");
+    $("qrContent").innerHTML = `<div class="qr-loading" style="color:#dc2626">❌ No QR configured for this amount<br><small style="font-size:11px">Contact support</small></div>`;
+    return;
+  }
+
+  $("qrSection").classList.add("show");
+  
+  // Add Download Button with Image
+  $("qrContent").innerHTML = `
+    <div class="qr-image">
+      <img src="${esc(selectedQrConfig.imageUrl)}" alt="QR Code" crossorigin="anonymous">
+    </div>
+    <a href="${esc(selectedQrConfig.imageUrl)}" download="Payment_QR_${amt}.png" target="_blank" class="download-qr-btn">
+      <i class="fa-solid fa-download"></i> Download QR
+    </a>
+    <div class="qr-amount"><small>Rs</small> ${amt.toLocaleString()}</div>
+    <div class="qr-note">
+      ${selectedQrConfig.walletName ? esc(selectedQrConfig.walletName) : ""}
+    </div>
+  `;
+
+  if (!expiresAt) startTimer();
+}
+
+function startTimer() {
+  expiresAt = Date.now() + (TIMER_MINUTES * 60 * 1000);
+  updateTimerDisplay();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimerDisplay, 1000);
+}
+
+function updateTimerDisplay() {
+  const left = expiresAt - Date.now();
+  const m = Math.floor(left / 60000);
+  const s = Math.floor((left % 60000) / 1000);
+  const timeStr = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  
+  if ($("timerDisplay")) $("timerDisplay").innerText = timeStr;
+  if ($("statusTimer")) $("statusTimer").innerText = timeStr;
+
+  if (left <= 0) {
+    clearInterval(timerInterval);
+    if ($("timerDisplay")) $("timerDisplay").innerText = "00:00";
+    
+    // If status is still waiting after 10 mins, auto redirect
+    if ($("waitingScreen").classList.contains("show")) {
+      toast("Time expired. Redirecting...");
+      setTimeout(goHome, 1500);
+    }
+  }
+}
+
+function submitPayment() {
+  if (!selectedAmount || selectedAmount < 1) return toast("Please select amount");
+  const wallet = $("userWallet").value.trim();
+  if (!wallet || wallet.length < 10) return toast("Enter valid wallet number");
+  if (!/^\d+$/.test(wallet)) return toast("Only digits allowed");
+  if (!selectedQrConfig) return toast("QR not configured. Contact support.");
+
+  const btn = $("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Submitting...';
+
+  const reqRef = db.ref("deposit_requests").push();
+  requestId = reqRef.key;
+  const now = Date.now();
+  
+  reqRef.set({
+    uid: currentUser.uid,
+    publicUid: userData.publicUid || "",
+    userName: userData.name || "",
+    phone: userData.phone || "",
+    amount: selectedAmount,
+    method: "QR_PAYMENT",
+    methodKey: "qr",
+    qrConfig: selectedQrConfig,
+    userWalletNumber: wallet,
+    userConfirmed: true,
+    userConfirmedAt: now,
+    status: "pending",
+    source: "merchant_qr",
+    createdAt: now,
+    expiresAt: expiresAt || (now + TIMER_MINUTES * 60 * 1000),
+    approvedAt: null,
+    rejectedAt: null,
+    credited: false
+  }).then(() => {
+    // Hide form, show waiting screen
+    $("paymentForm").style.display = "none";
+    $("waitingScreen").classList.add("show");
+    $("mainTitle").innerText = "Processing";
+    $("mainSubtitle").innerText = "Please wait a moment";
+    
+    // Listen to Firebase Status
+    listenToRequestStatus();
+  }).catch(e => {
+    toast("Failed: " + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>I\'VE SENT THE PAYMENT';
+  });
+}
+
+function listenToRequestStatus() {
+  if (!requestId) return;
+  
+  if (statusListener) statusListener.off();
+  statusListener = db.ref("deposit_requests/" + requestId);
+  
+  statusListener.on("value", (snap) => {
+    const data = snap.val();
+    if (!data) return;
+    
+    const status = (data.status || "").toLowerCase();
+    
+    if (status === "approved") {
+      clearInterval(timerInterval);
+      clearInterval(statusTimerInterval);
+      $("waitingScreen").classList.remove("show");
+      $("successScreen").classList.add("show");
+      $("successAmt").innerText = Number(data.amount).toLocaleString();
+      $("mainTitle").innerText = "Success";
+      $("mainSubtitle").innerText = "Payment confirmed";
+    } 
+    else if (status === "rejected") {
+      clearInterval(timerInterval);
+      clearInterval(statusTimerInterval);
+      $("waitingScreen").classList.remove("show");
+      $("rejectedScreen").classList.add("show");
+      if (data.rejectReason) {
+        $("rejectedReason").innerText = "Reason: " + data.rejectReason;
+      }
+      $("mainTitle").innerText = "Rejected";
+      $("mainSubtitle").innerText = "Payment declined";
+    }
+  });
+}
+
+// Live input monitoring
+$("amtInput").addEventListener("input", () => {
+  const v = Number($("amtInput").value) || 0;
+  selectedAmount = v;
+  document.querySelectorAll(".amt-btn").forEach(b => b.classList.remove("selected"));
+  if (v >= 1) checkAndShowQr();
+  else $("qrSection").classList.remove("show");
+});
+
+$("userWallet").addEventListener("input", (e) => {
+  e.target.value = e.target.value.replace(/\D/g, "").slice(0, 11);
+});
+
+// Auth
+auth.onAuthStateChanged(async (user) => {
+  if (!user) { goHome(); return; }
+  const snap = await db.ref("users/" + user.uid).once("value");
+  const data = snap.val();
+  if (!data) { await auth.signOut(); goHome(); return; }
+  if (data.status === "banned") { alert("Account banned"); await auth.signOut(); goHome(); return; }
+  
+  currentUser = user;
+  userData = data;
+  
+  renderAmountGrid();
+  await loadQrConfigs();
+  
+  $("loadingScreen").style.display = "none";
+});
+</script>
 </body>
 </html>
