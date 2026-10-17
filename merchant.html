@@ -42,8 +42,10 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 .qr-display{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #10b981;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;position:relative}
 .qr-display::before{content:'';position:absolute;top:8px;left:8px;right:8px;bottom:8px;border:2px dashed #10b981;border-radius:12px;pointer-events:none;opacity:.3}
 .qr-header{font-size:10px;font-weight:900;color:#065f46;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;position:relative}
-.qr-image{width:200px;height:200px;margin:0 auto;background:#fff;border-radius:12px;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.qr-image{width:200px;height:200px;margin:0 auto;background:#fff;border-radius:12px;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,.08);position:relative}
 .qr-image img{width:100%;height:100%;object-fit:contain;border-radius:8px}
+.download-qr-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:#10b981;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:800;text-decoration:none;box-shadow:0 4px 10px rgba(16,185,129,.3);position:relative;z-index:5}
+.download-qr-btn:active{transform:scale(.95)}
 .qr-amount{font-size:32px;font-weight:900;color:#065f46;margin-top:14px;position:relative}
 .qr-amount small{font-size:14px;font-weight:700;color:#059669}
 .qr-note{font-size:11px;color:#047857;margin-top:6px;font-weight:600;position:relative}
@@ -63,6 +65,18 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 .spinner{width:44px;height:44px;border:4px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{100%{transform:rotate(360deg)}}
 .loading-screen p{font-size:13px;font-weight:700;color:#475569}
+
+/* STATUS SCREENS CSS */
+.status-screen{display:none;text-align:center;padding:20px 0;animation:fadeIn .3s}
+.status-screen.show{display:block}
+.status-icon{width:80px;height:80px;margin:0 auto 20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px}
+.status-icon.waiting{background:#fef3c7;color:#d97706}
+.status-icon.success{background:#dcfce7;color:#16a34a}
+.status-icon.rejected{background:#fee2e2;color:#dc2626}
+.status-title{font-size:22px;font-weight:900;color:#1e293b;margin-bottom:8px}
+.status-desc{font-size:13px;color:#64748b;margin-bottom:20px}
+.status-spinner{width:32px;height:32px;border:4px solid #e2e8f0;border-top-color:#d97706;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px}
+.back-home-btn{width:100%;padding:16px;background:#2563eb;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:900;margin-top:20px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -75,7 +89,7 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 <div class="app">
   <div class="top">
     <div class="header">
-      <div class="back" onclick="location.href='../index.html'">
+      <div class="back" onclick="goHome()">
         <i class="fa-solid fa-arrow-left"></i>
       </div>
       <div class="title">Secure Payment</div>
@@ -84,52 +98,102 @@ body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
       </div>
     </div>
     <div class="hero">
-      <h1>Complete Payment</h1>
-      <p>Choose amount & scan QR to pay</p>
+      <h1 id="mainTitle">Complete Payment</h1>
+      <p id="mainSubtitle">Choose amount & scan QR to pay</p>
     </div>
   </div>
 
   <div class="amount-card">
-    <div class="section-title"><span class="num">1</span> Select Amount</div>
-    <div class="amt-grid" id="amtGrid"></div>
-    <div class="amt-input">
-      <span>Rs</span>
-      <input type="number" id="amtInput" placeholder="Custom amount" min="1">
+    <!-- MAIN PAYMENT FORM -->
+    <div id="paymentForm">
+      <div class="section-title"><span class="num">1</span> Select Amount</div>
+      <div class="amt-grid" id="amtGrid"></div>
+      <div class="amt-input">
+        <span>Rs</span>
+        <input type="number" id="amtInput" placeholder="Custom amount" min="1">
+      </div>
+
+      <div id="qrSection" class="qr-section">
+        <div class="section-title"><span class="num">2</span> Scan & Pay</div>
+
+        <div class="timer-box">
+          <div class="t-left">
+            <div class="t-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+            <div class="t-info">
+              <p>Time Remaining</p>
+              <h3 id="timerDisplay">10:00</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="qr-display" id="qrDisplay">
+          <div class="qr-header">📱 SCAN WITH ANY PAYMENT APP</div>
+          <div id="qrContent">
+            <div class="qr-loading">Loading QR...</div>
+          </div>
+        </div>
+
+        <div class="wallet-input">
+          <div class="section-title"><span class="num">3</span> Your Wallet Number</div>
+          <input type="tel" id="userWallet" placeholder="03XXXXXXXXX" maxlength="11" inputmode="numeric">
+          <p>The number you'll send payment FROM</p>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitPayment()">
+          <i class="fa-solid fa-check-circle mr-2"></i>I'VE SENT THE PAYMENT
+        </button>
+        <button class="cancel-btn" onclick="goHome()">
+          Cancel
+        </button>
+      </div>
     </div>
 
-    <div id="qrSection" class="qr-section">
-      <div class="section-title"><span class="num">2</span> Scan & Pay</div>
-
-      <div class="timer-box">
+    <!-- WAITING SCREEN -->
+    <div id="waitingScreen" class="status-screen">
+      <div class="status-icon waiting">
+        <i class="fa-solid fa-hourglass-half"></i>
+      </div>
+      <h2 class="status-title">Verifying Payment</h2>
+      <p class="status-desc">Your payment request has been sent to the admin. Please wait while we verify your transaction.</p>
+      
+      <div class="timer-box" style="justify-content:center;margin-top:20px;">
         <div class="t-left">
-          <div class="t-icon"><i class="fa-solid fa-hourglass-half"></i></div>
-          <div class="t-info">
-            <p>Time Remaining</p>
-            <h3 id="timerDisplay">10:00</h3>
+          <div class="t-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="t-info" style="text-align:left">
+            <p>Auto-Redirect in</p>
+            <h3 id="statusTimer">10:00</h3>
           </div>
         </div>
       </div>
 
-      <div class="qr-display" id="qrDisplay">
-        <div class="qr-header">📱 SCAN WITH ANY PAYMENT APP</div>
-        <div id="qrContent">
-          <div class="qr-loading">Loading QR...</div>
-        </div>
-      </div>
+      <div class="status-spinner" style="margin-top:30px"></div>
+      <p style="font-size:11px;font-weight:800;color:#94a3b8;letter-spacing:1px">WAITING FOR ADMIN APPROVAL</p>
+    </div>
 
-      <div class="wallet-input">
-        <div class="section-title"><span class="num">3</span> Your Wallet Number</div>
-        <input type="tel" id="userWallet" placeholder="03XXXXXXXXX" maxlength="11" inputmode="numeric">
-        <p>The number you'll send payment FROM</p>
+    <!-- SUCCESS SCREEN -->
+    <div id="successScreen" class="status-screen">
+      <div class="status-icon success">
+        <i class="fa-solid fa-circle-check"></i>
       </div>
-
-      <button class="submit-btn" id="submitBtn" onclick="submitPayment()">
-        <i class="fa-solid fa-check-circle mr-2"></i>I'VE SENT THE PAYMENT
-      </button>
-      <button class="cancel-btn" onclick="cancelPayment()">
-        Cancel
+      <h2 class="status-title" style="color:#16a34a">Payment Approved!</h2>
+      <p class="status-desc">Rs <span id="successAmt">0</span> has been successfully added to your wallet.</p>
+      <button class="back-home-btn" onclick="goHome()">
+        <i class="fa-solid fa-house mr-2"></i> Back to App
       </button>
     </div>
+
+    <!-- REJECTED SCREEN -->
+    <div id="rejectedScreen" class="status-screen">
+      <div class="status-icon rejected">
+        <i class="fa-solid fa-circle-xmark"></i>
+      </div>
+      <h2 class="status-title" style="color:#dc2626">Payment Rejected</h2>
+      <p class="status-desc" id="rejectedReason">Your payment request was rejected by the admin. Please contact support.</p>
+      <button class="back-home-btn" onclick="goHome()">
+        <i class="fa-solid fa-house mr-2"></i> Back to App
+      </button>
+    </div>
+
   </div>
 </div>
 
@@ -160,7 +224,9 @@ let selectedQrConfig = null;
 let requestId = null;
 let expiresAt = null;
 let timerInterval = null;
+let statusTimerInterval = null;
 let qrConfigs = {};
+let statusListener = null;
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -171,6 +237,16 @@ function toast(msg) {
   t.className = "toast show";
   clearTimeout(t._h);
   t._h = setTimeout(() => { t.className = "toast"; }, 2500);
+}
+
+// Safe redirect to avoid 404
+function goHome() {
+  try {
+    if (statusListener) statusListener.off();
+    window.location.href = "../index.html";
+  } catch (e) {
+    window.location.href = "/";
+  }
 }
 
 function renderAmountGrid() {
@@ -210,11 +286,7 @@ function getQrForAmount(amt) {
 
 function checkAndShowQr() {
   const amt = Number($("amtInput").value) || selectedAmount;
-  if (!amt || amt < 1) {
-    $("qrSection").classList.remove("show");
-    return;
-  }
-  if (amt < 1 || amt > 500000) {
+  if (!amt || amt < 1 || amt > 500000) {
     $("qrSection").classList.remove("show");
     return;
   }
@@ -229,20 +301,22 @@ function checkAndShowQr() {
   }
 
   $("qrSection").classList.add("show");
+  
+  // Add Download Button with Image
   $("qrContent").innerHTML = `
     <div class="qr-image">
-      <img src="${esc(selectedQrConfig.imageUrl)}" alt="QR Code">
+      <img src="${esc(selectedQrConfig.imageUrl)}" alt="QR Code" crossorigin="anonymous">
     </div>
+    <a href="${esc(selectedQrConfig.imageUrl)}" download="Payment_QR_${amt}.png" target="_blank" class="download-qr-btn">
+      <i class="fa-solid fa-download"></i> Download QR
+    </a>
     <div class="qr-amount"><small>Rs</small> ${amt.toLocaleString()}</div>
     <div class="qr-note">
       ${selectedQrConfig.walletName ? esc(selectedQrConfig.walletName) : ""}
     </div>
   `;
 
-  // Start timer if not started
-  if (!expiresAt) {
-    startTimer();
-  }
+  if (!expiresAt) startTimer();
 }
 
 function startTimer() {
@@ -254,77 +328,108 @@ function startTimer() {
 
 function updateTimerDisplay() {
   const left = expiresAt - Date.now();
-  if (left <= 0) {
-    clearInterval(timerInterval);
-    $("timerDisplay").innerText = "00:00";
-    $("timerDisplay").style.color = "#dc2626";
-    return;
-  }
   const m = Math.floor(left / 60000);
   const s = Math.floor((left % 60000) / 1000);
-  $("timerDisplay").innerText = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  const timeStr = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  
+  if ($("timerDisplay")) $("timerDisplay").innerText = timeStr;
+  if ($("statusTimer")) $("statusTimer").innerText = timeStr;
+
+  if (left <= 0) {
+    clearInterval(timerInterval);
+    if ($("timerDisplay")) $("timerDisplay").innerText = "00:00";
+    
+    // If status is still waiting after 10 mins, auto redirect
+    if ($("waitingScreen").classList.contains("show")) {
+      toast("Time expired. Redirecting...");
+      setTimeout(goHome, 1500);
+    }
+  }
 }
 
-async function submitPayment() {
-  if (!selectedAmount || selectedAmount < 1) {
-    return toast("Please select amount");
-  }
+function submitPayment() {
+  if (!selectedAmount || selectedAmount < 1) return toast("Please select amount");
   const wallet = $("userWallet").value.trim();
-  if (!wallet || wallet.length < 10) {
-    return toast("Enter valid wallet number");
-  }
-  if (!/^\d+$/.test(wallet)) {
-    return toast("Only digits allowed");
-  }
-  if (!selectedQrConfig) {
-    return toast("QR not configured. Contact support.");
-  }
+  if (!wallet || wallet.length < 10) return toast("Enter valid wallet number");
+  if (!/^\d+$/.test(wallet)) return toast("Only digits allowed");
+  if (!selectedQrConfig) return toast("QR not configured. Contact support.");
 
   const btn = $("submitBtn");
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Submitting...';
 
-  try {
-    const reqRef = db.ref("deposit_requests").push();
-    requestId = reqRef.key;
-    const now = Date.now();
+  const reqRef = db.ref("deposit_requests").push();
+  requestId = reqRef.key;
+  const now = Date.now();
+  
+  reqRef.set({
+    uid: currentUser.uid,
+    publicUid: userData.publicUid || "",
+    userName: userData.name || "",
+    phone: userData.phone || "",
+    amount: selectedAmount,
+    method: "QR_PAYMENT",
+    methodKey: "qr",
+    qrConfig: selectedQrConfig,
+    userWalletNumber: wallet,
+    userConfirmed: true,
+    userConfirmedAt: now,
+    status: "pending",
+    source: "merchant_qr",
+    createdAt: now,
+    expiresAt: expiresAt || (now + TIMER_MINUTES * 60 * 1000),
+    approvedAt: null,
+    rejectedAt: null,
+    credited: false
+  }).then(() => {
+    // Hide form, show waiting screen
+    $("paymentForm").style.display = "none";
+    $("waitingScreen").classList.add("show");
+    $("mainTitle").innerText = "Processing";
+    $("mainSubtitle").innerText = "Please wait a moment";
     
-    await reqRef.set({
-      uid: currentUser.uid,
-      publicUid: userData.publicUid || "",
-      userName: userData.name || "",
-      phone: userData.phone || "",
-      amount: selectedAmount,
-      method: "QR_PAYMENT",
-      methodKey: "qr",
-      qrConfig: selectedQrConfig,
-      userWalletNumber: wallet,
-      userConfirmed: true,
-      userConfirmedAt: now,
-      status: "pending",
-      source: "merchant_qr",
-      createdAt: now,
-      expiresAt: expiresAt || (now + TIMER_MINUTES * 60 * 1000),
-      approvedAt: null,
-      rejectedAt: null,
-      credited: false
-    });
-
-    toast("✅ Request sent! Waiting for approval.");
-    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Submitted';
-    
-    setTimeout(() => {
-      location.href = "../index.html";
-    }, 2000);
-  } catch (e) {
+    // Listen to Firebase Status
+    listenToRequestStatus();
+  }).catch(e => {
     toast("Failed: " + e.message);
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>I\'VE SENT THE PAYMENT';
-  }
+  });
 }
 
-function cancelPayment() {
-  location.href = "../index.html";
+function listenToRequestStatus() {
+  if (!requestId) return;
+  
+  if (statusListener) statusListener.off();
+  statusListener = db.ref("deposit_requests/" + requestId);
+  
+  statusListener.on("value", (snap) => {
+    const data = snap.val();
+    if (!data) return;
+    
+    const status = (data.status || "").toLowerCase();
+    
+    if (status === "approved") {
+      clearInterval(timerInterval);
+      clearInterval(statusTimerInterval);
+      $("waitingScreen").classList.remove("show");
+      $("successScreen").classList.add("show");
+      $("successAmt").innerText = Number(data.amount).toLocaleString();
+      $("mainTitle").innerText = "Success";
+      $("mainSubtitle").innerText = "Payment confirmed";
+    } 
+    else if (status === "rejected") {
+      clearInterval(timerInterval);
+      clearInterval(statusTimerInterval);
+      $("waitingScreen").classList.remove("show");
+      $("rejectedScreen").classList.add("show");
+      if (data.rejectReason) {
+        $("rejectedReason").innerText = "Reason: " + data.rejectReason;
+      }
+      $("mainTitle").innerText = "Rejected";
+      $("mainSubtitle").innerText = "Payment declined";
+    }
+  });
 }
 
 // Live input monitoring
@@ -332,11 +437,8 @@ $("amtInput").addEventListener("input", () => {
   const v = Number($("amtInput").value) || 0;
   selectedAmount = v;
   document.querySelectorAll(".amt-btn").forEach(b => b.classList.remove("selected"));
-  if (v >= 1) {
-    checkAndShowQr();
-  } else {
-    $("qrSection").classList.remove("show");
-  }
+  if (v >= 1) checkAndShowQr();
+  else $("qrSection").classList.remove("show");
 });
 
 $("userWallet").addEventListener("input", (e) => {
@@ -345,11 +447,11 @@ $("userWallet").addEventListener("input", (e) => {
 
 // Auth
 auth.onAuthStateChanged(async (user) => {
-  if (!user) { location.href = "../index.html?auth=1"; return; }
+  if (!user) { goHome(); return; }
   const snap = await db.ref("users/" + user.uid).once("value");
   const data = snap.val();
-  if (!data) { await auth.signOut(); location.href = "../index.html?auth=1"; return; }
-  if (data.status === "banned") { alert("Account banned"); await auth.signOut(); location.href = "../index.html"; return; }
+  if (!data) { await auth.signOut(); goHome(); return; }
+  if (data.status === "banned") { alert("Account banned"); await auth.signOut(); goHome(); return; }
   
   currentUser = user;
   userData = data;
