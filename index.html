@@ -33,6 +33,7 @@ body{background-color:#f6f6f6;font-family:'Inter',sans-serif;user-select:none;-w
 @keyframes pulseRing{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}50%{box-shadow:0 0 0 14px rgba(16,185,129,0)}}
 .pulse-ring{animation:pulseRing 1.8s infinite}
 .locked-input{background-color:#ecfdf5!important;color:#047857!important;font-weight:800!important}
+.qs-fab{box-shadow:0 10px 25px rgba(16,185,129,.5)}
 </style>
 </head>
 <body>
@@ -68,7 +69,7 @@ body{background-color:#f6f6f6;font-family:'Inter',sans-serif;user-select:none;-w
             <i class="fa-solid fa-circle-check mr-1"></i>Code copied to clipboard!
           </p>
         </div>
-        <a id="apkDownloadBtn" href="92Blue.apk" download class="mt-5 w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black p-4 rounded-full text-lg shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+        <a id="apkDownloadBtn" href="92blue.apk" download class="mt-5 w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black p-4 rounded-full text-lg shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-download text-xl"></i> DOWNLOAD APP
         </a>
         <div class="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
@@ -499,6 +500,10 @@ body{background-color:#f6f6f6;font-family:'Inter',sans-serif;user-select:none;-w
         <div class="flex items-center gap-3"><div class="w-7 h-7 rounded-lg bg-blue-100 text-[#2563eb] flex items-center justify-center text-xs"><i class="fa-solid fa-headset"></i></div><span class="font-bold text-xs text-gray-700">Customer Service</span></div>
         <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
       </div>
+      <div onclick="openQuickService()" class="p-3.5 flex items-center justify-between cursor-pointer active:bg-gray-50">
+        <div class="flex items-center gap-3"><div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs"><i class="fa-solid fa-comments"></i></div><span class="font-bold text-xs text-gray-700">Quick Support</span><span class="text-[9px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-black">NEW</span></div>
+        <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+      </div>
       <div onclick="openAboutUs()" class="p-3.5 flex items-center justify-between cursor-pointer active:bg-gray-50">
         <div class="flex items-center gap-3"><div class="w-7 h-7 rounded-lg bg-blue-100 text-[#2563eb] flex items-center justify-center text-xs"><i class="fa-solid fa-circle-info"></i></div><span class="font-bold text-xs text-gray-700">About us</span></div>
         <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
@@ -519,6 +524,13 @@ body{background-color:#f6f6f6;font-family:'Inter',sans-serif;user-select:none;-w
     <div onclick="nav('promotion')" data-nav="promotion" class="bottom-nav-item text-center flex-1 cursor-pointer flex flex-col items-center"><i class="fa-solid fa-sack-dollar text-[20px] mb-1"></i><span>Promotion</span></div>
     <div onclick="nav('profile')" data-nav="profile" class="bottom-nav-item text-center flex-1 cursor-pointer flex flex-col items-center"><i class="fa-solid fa-circle-user text-[20px] mb-1"></i><span>Account</span></div>
   </div>
+
+  <!-- QUICK SUPPORT FAB -->
+  <div onclick="openQuickService()" id="quickServiceFab" class="qs-fab fixed bottom-24 w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full flex items-center justify-center cursor-pointer active:scale-95 transition z-50" style="right:max(1rem,calc(50vw - 207px + 1rem))">
+    <i class="fa-solid fa-headset text-2xl"></i>
+    <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white"></span>
+  </div>
+
 </div>
 
 <!-- GENERIC MODAL -->
@@ -551,6 +563,21 @@ body{background-color:#f6f6f6;font-family:'Inter',sans-serif;user-select:none;-w
       <i class="fa-solid fa-xmark text-xl cursor-pointer" onclick="closeWalletChangeModal()"></i>
     </div>
     <div class="p-4 overflow-y-auto flex-1 space-y-3" id="walletChangeBody"></div>
+  </div>
+</div>
+
+<!-- QUICK CUSTOMER SERVICE MODAL (WhatsApp-style) -->
+<div id="quickServiceModal" class="hide fixed inset-0 z-[2600] bg-black/70 backdrop-blur-sm flex items-end justify-center max-w-[414px] mx-auto">
+  <div class="bg-[#efeae2] rounded-t-3xl w-full h-[92vh] max-h-[780px] flex flex-col overflow-hidden shadow-2xl sheet-up">
+    <div class="bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-white p-3 flex items-center gap-2 shadow-md">
+      <div class="w-10 h-10 bg-white text-[#2563eb] rounded-full flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-headset text-lg"></i></div>
+      <div class="flex-1 min-w-0">
+        <p class="font-black text-sm truncate">92Blue Support</p>
+        <p class="text-[10px] opacity-90 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-300 rounded-full inline-block"></span>Online — Typically replies in minutes</p>
+      </div>
+      <button onclick="closeQuickService()" class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <div id="qsChatBody" class="flex-1 overflow-y-auto p-3 space-y-2" style="background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22><g fill=%22%23000000%22 fill-opacity=%220.03%22><circle cx=%2210%22 cy=%2210%22 r=%221%22/><circle cx=%2230%22 cy=%2230%22 r=%221%22/><circle cx=%2250%22 cy=%2210%22 r=%221%22/><circle cx=%2220%22 cy=%2240%22 r=%221%22/><circle cx=%2245%22 cy=%2250%22 r=%221%22/></g></svg>')"></div>
   </div>
 </div>
 
@@ -587,6 +614,13 @@ body{background-color:#f6f6f6;font-family:'Inter',sans-serif;user-select:none;-w
         <div class="flex justify-between text-xs mb-2"><span class="text-gray-500">Amount</span><span class="font-bold text-gray-800" id="mchWaitAmt">—</span></div>
         <div class="flex justify-between text-xs mb-2"><span class="text-gray-500">Method</span><span class="font-bold text-gray-800" id="mchWaitMethod">—</span></div>
         <div class="flex justify-between text-xs"><span class="text-gray-500">Status</span><span class="font-black text-amber-600" id="mchWaitStatus">PENDING</span></div>
+      </div>
+      <div id="mchPayNowWrap" class="hide mt-4">
+        <a id="mchPayNowBtn" href="#" target="_blank" rel="noopener noreferrer"
+           class="block w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white text-center py-3.5 rounded-full font-black text-sm shadow-lg active:scale-95 transition">
+          <i class="fa-solid fa-external-link-alt mr-2"></i>PAY NOW — OPEN PAYMENT PAGE
+        </a>
+        <p class="text-[10px] text-gray-500 mt-2 font-bold">Complete the payment to get approved faster</p>
       </div>
       <div class="mt-5">
         <div class="w-8 h-8 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -936,11 +970,10 @@ async function logout() {
 }
 
 /* ============================================================
-   SPLASH SCREEN — LOAD IMAGE + HIDE AFTER DELAY
+   SPLASH SCREEN
 ============================================================ */
 const SPLASH_START_TS = Date.now();
 
-// ✅ Ye function splash screen ko hide karta hai
 async function hideSplash() {
   const elapsed = Date.now() - SPLASH_START_TS;
   if (elapsed < SPLASH_MIN_DISPLAY_MS) {
@@ -952,13 +985,11 @@ async function hideSplash() {
   if (fb) fb.style.display = "none";
 }
 
-// ✅ Image load karo
 (async () => {
   const img = $("appLoadingImg");
   const fb = $("splashFallback");
   if (!img) return;
 
-  // Pehle local image try karo
   const localUrl = SPLASH_IMAGE_URL && !SPLASH_IMAGE_URL.includes("REPLACE_WITH")
     ? SPLASH_IMAGE_URL
     : "";
@@ -975,7 +1006,6 @@ async function hideSplash() {
     };
     img.src = localUrl;
 
-    // Background me Firebase check karo
     try {
       const snap = await db.ref("adminSettings/loadingScreen").once("value");
       const ls = snap.val();
@@ -1005,7 +1035,6 @@ async function hideSplash() {
     }
   }
 
-  // ✅ Safety: 5 second me splash band karo agar kuch fail ho jaye
   setTimeout(() => {
     console.log("[Splash] Safety timeout — hiding splash");
     hideSplash();
@@ -1336,10 +1365,12 @@ async function backfillDepositCommissions(myUid) {
 }
 
 /* ============================================================
-   DEPOSIT FLOW — IN-APP MERCHANT
+   DEPOSIT FLOW — IN-APP MERCHANT (FIXED: URL MODE SUPPORT)
 ============================================================ */
 const DEP_AMTS = [300, 500, 1000, 3000, 5000, 10000];
 let selectedDepMethod = "";
+let selectedDepMode = "default";        // NEW: "number" | "default" | "merchant_url"
+let selectedDepMerchantUrl = "";        // NEW: URL for merchant_url mode
 let depConfig = {};
 let mchConfig = {};
 let depTimerInterval = null;
@@ -1378,62 +1409,122 @@ function setDepMethod(key, name, el) {
 
   const details = $("depPaymentDetails");
 
-  // Check if admin has set a valid number for this method
   const rawAdminNum = String(depConfig[key + "Number"] || mchConfig[key + "Number"] || "").trim();
   const adminName = String(depConfig[key + "Name"] || mchConfig[key + "Name"] || "").trim();
   const logo = depConfig[key + "Logo"] || mchConfig[key + "Logo"];
 
-  // Auto mode = no admin number OR placeholder
-  const isAutoMode = !rawAdminNum || rawAdminNum === "—" || rawAdminNum === "-" || rawAdminNum.length < 5;
+  // Read payment mode + merchant URL (with all alias fallbacks)
+  const paymentMode = String(
+    depConfig[key + "PaymentMode"] ||
+    depConfig[key + "Mode"] ||
+    mchConfig[key + "PaymentMode"] ||
+    mchConfig[key + "Mode"] ||
+    (rawAdminNum ? "number" : "default")
+  ).toLowerCase();
 
-  if (isAutoMode) {
-    // 🟢 AUTO MODE — Sirf user se number maango
+  const merchantUrl = String(
+    depConfig[key + "MerchantUrl"] ||
+    depConfig[key + "Url"] ||
+    depConfig[key + "PaymentUrl"] ||
+    mchConfig[key + "MerchantUrl"] ||
+    mchConfig[key + "Url"] ||
+    depConfig.merchantUrl ||
+    mchConfig.merchantUrl ||
+    ""
+  ).trim();
+
+  selectedDepMode = paymentMode;
+  selectedDepMerchantUrl = merchantUrl;
+
+  const methodHeader = `
+    <div class="flex items-center gap-3 mb-3">
+      ${logo ? `<img src="${esc(logo)}" class="w-12 h-12 object-contain">` : `<div class="w-12 h-12 rounded-lg bg-blue-500 text-white font-black flex items-center justify-center">${name.slice(0,2).toUpperCase()}</div>`}
+      <div class="flex-1 min-w-0">
+        <p class="text-[10px] font-bold text-gray-500 uppercase">Payment Method</p>
+        <p class="text-lg font-black text-gray-800">${esc(name)}</p>
+      </div>
+    </div>`;
+
+  const numberInput = `
+    <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1"><i class="fa-solid fa-mobile-screen mr-1"></i>Your ${esc(name)} Number</label>
+    <input type="tel" id="depUserNumber" placeholder="03XXXXXXXXX" maxlength="11" inputmode="numeric"
+      class="w-full p-3 bg-white border-2 border-gray-200 rounded-xl font-black text-center text-lg outline-none focus:border-[#2563eb] transition tracking-widest">
+    <p class="text-[10px] text-gray-400 mt-2 text-center italic">Enter the number you will pay from</p>
+  `;
+
+  // ═══════════════════════════════════════════════════════════
+  // MODE 1: 🔗 MERCHANT URL
+  // ═══════════════════════════════════════════════════════════
+  if (paymentMode === "merchant_url" && merchantUrl) {
     details.innerHTML = `
-      <div class="flex items-center gap-3 mb-3">
-        ${logo ? `<img src="${esc(logo)}" class="w-12 h-12 object-contain">` : `<div class="w-12 h-12 rounded-lg bg-blue-500 text-white font-black flex items-center justify-center">${name.slice(0,2).toUpperCase()}</div>`}
-        <div class="flex-1 min-w-0">
-          <p class="text-[10px] font-bold text-gray-500 uppercase">Payment Method</p>
-          <p class="text-lg font-black text-gray-800">${esc(name)}</p>
+      ${methodHeader}
+      <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl p-4 mb-3 shadow-lg">
+        <p class="text-[10px] font-black uppercase tracking-widest opacity-90 mb-2">
+          <i class="fa-solid fa-shield-halved mr-1"></i>Secure Payment Gateway
+        </p>
+        <a href="${esc(merchantUrl)}" target="_blank" rel="noopener noreferrer"
+           class="block w-full bg-white text-blue-700 text-center py-3 rounded-xl font-black text-sm active:scale-95 transition shadow-md">
+          <i class="fa-solid fa-external-link-alt mr-2"></i>PAY NOW — OPEN PAYMENT PAGE
+        </a>
+        <div class="flex items-center gap-2 mt-2 bg-black/20 rounded-lg p-2">
+          <p class="text-[9px] opacity-90 flex-1 truncate font-mono">${esc(merchantUrl)}</p>
+          <button onclick="copyText('${esc(merchantUrl)}', 'URL copied')" class="bg-white/25 px-2 py-1 rounded text-[9px] font-black">
+            <i class="fa-solid fa-copy"></i>
+          </button>
         </div>
       </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+        <p class="text-[11px] font-bold text-amber-800 leading-relaxed">
+          <i class="fa-solid fa-1 mr-1"></i><b>Step 1:</b> Click <b>PAY NOW</b> above and complete payment.<br>
+          <i class="fa-solid fa-2 mr-1 mt-1"></i><b>Step 2:</b> Come back, enter your number below and tap <b>DEPOSIT</b>.
+        </p>
+      </div>
+      ${numberInput}
+    `;
+  }
+  // ═══════════════════════════════════════════════════════════
+  // MODE 2: 📱 SHOW NUMBER
+  // ═══════════════════════════════════════════════════════════
+  else if (paymentMode === "number" && rawAdminNum && rawAdminNum.length >= 5) {
+    details.innerHTML = `
+      ${methodHeader}
+      <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 mb-3">
+        <p class="text-[10px] font-bold text-emerald-700 uppercase mb-1">
+          <i class="fa-solid fa-building-columns mr-1"></i>Send payment to
+        </p>
+        <div class="flex items-center gap-2">
+          <p class="text-xl font-black text-emerald-900 font-mono break-all flex-1" id="depAdminNum">${esc(rawAdminNum)}</p>
+          <button onclick="copyText('${esc(rawAdminNum)}', 'Number copied')" class="bg-white border-2 border-emerald-300 text-emerald-700 px-3 py-2 rounded-lg text-xs font-bold active:scale-95">
+            <i class="fa-solid fa-copy"></i>
+          </button>
+        </div>
+        ${adminName ? `<p class="text-[11px] text-emerald-700 mt-1"><i class="fa-solid fa-user mr-1"></i>${esc(adminName)}</p>` : ""}
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+        <p class="text-[11px] font-bold text-amber-800 leading-relaxed">
+          <i class="fa-solid fa-1 mr-1"></i><b>Step 1:</b> Send <b>Rs <span id="depShowAmt">0</span></b> to the number above.<br>
+          <i class="fa-solid fa-2 mr-1 mt-1"></i><b>Step 2:</b> Enter YOUR number below.
+        </p>
+      </div>
+      ${numberInput}
+    `;
+  }
+  // ═══════════════════════════════════════════════════════════
+  // MODE 3: ⚙️ DEFAULT APP
+  // ═══════════════════════════════════════════════════════════
+  else {
+    details.innerHTML = `
+      ${methodHeader}
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
         <p class="text-[11px] font-bold text-blue-800 leading-relaxed">
           <i class="fa-solid fa-info-circle mr-1"></i>Enter your <b>${esc(name)}</b> number below. Admin will process your deposit.
         </p>
       </div>
-      <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1"><i class="fa-solid fa-mobile-screen mr-1"></i>Your ${esc(name)} Number</label>
-      <input type="tel" id="depUserNumber" placeholder="03XXXXXXXXX" maxlength="11" inputmode="numeric"
-        class="w-full p-3 bg-white border-2 border-gray-200 rounded-xl font-black text-center text-lg outline-none focus:border-[#2563eb] transition tracking-widest">
-      <p class="text-[10px] text-gray-400 mt-2 text-center italic">Enter the number from which you will send payment</p>
-    `;
-  } else {
-    // 🟡 MANUAL MODE — Admin number + user number
-    details.innerHTML = `
-      <div class="flex items-center gap-3 mb-3">
-        ${logo ? `<img src="${esc(logo)}" class="w-12 h-12 object-contain">` : `<div class="w-12 h-12 rounded-lg bg-blue-500 text-white font-black flex items-center justify-center">${name.slice(0,2).toUpperCase()}</div>`}
-        <div class="flex-1 min-w-0">
-          <p class="text-[10px] font-bold text-gray-500 uppercase">Send payment to</p>
-          <p class="text-lg font-black text-gray-800 break-all" id="depAdminNum">${esc(rawAdminNum)}</p>
-          ${adminName ? `<p class="text-[10px] text-gray-500">${esc(adminName)}</p>` : ""}
-        </div>
-        <button onclick="copyText('${esc(rawAdminNum)}', 'Number copied')" class="bg-white border-2 border-blue-300 text-blue-600 px-3 py-2 rounded-lg text-xs font-bold active:scale-95">
-          <i class="fa-solid fa-copy"></i>
-        </button>
-      </div>
-      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
-        <p class="text-[11px] font-bold text-amber-800 leading-relaxed">
-          <i class="fa-solid fa-1 mr-1"></i><b>Step 1:</b> Send <b>Rs <span id="depShowAmt">0</span></b> to the number above.<br>
-          <i class="fa-solid fa-2 mr-1 mt-2"></i><b>Step 2:</b> Enter YOUR ${esc(name)} number below.
-        </p>
-      </div>
-      <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1"><i class="fa-solid fa-mobile-screen mr-1"></i>Your ${esc(name)} Number</label>
-      <input type="tel" id="depUserNumber" placeholder="03XXXXXXXXX" maxlength="11" inputmode="numeric"
-        class="w-full p-3 bg-white border-2 border-gray-200 rounded-xl font-black text-center text-lg outline-none focus:border-[#2563eb] transition tracking-widest">
-      <p class="text-[10px] text-gray-400 mt-2 text-center italic">The number you SENT the payment FROM</p>
+      ${numberInput}
     `;
   }
 
-  // Amount syncing (only shown in manual mode)
+  // Amount sync
   const amtEl = $("depAmount");
   const syncAmt = () => { const s = $("depShowAmt"); if (s) s.innerText = String(Number(amtEl.value) || 0); };
   if (amtEl) { const oldHandler = amtEl.oninput; amtEl.oninput = (e) => { if (oldHandler) oldHandler(e); syncAmt(); }; }
@@ -1472,17 +1563,18 @@ async function submitDepositRequest() {
     const key = selectedDepMethod;
     const methodName = methodLabel;
 
-    // Determine if manual or auto
     const rawAdminNum = String(depConfig[key + "Number"] || mchConfig[key + "Number"] || "").trim();
     const adminName = String(depConfig[key + "Name"] || mchConfig[key + "Name"] || "").trim();
     const isAutoMode = !rawAdminNum || rawAdminNum === "—" || rawAdminNum === "-" || rawAdminNum.length < 5;
-
     const adminNumber = isAutoMode ? "" : rawAdminNum;
+
+    // Use mode set in setDepMethod()
+    const mode = selectedDepMode || (isAutoMode ? "default" : "number");
+    const merchantUrl = (mode === "merchant_url") ? selectedDepMerchantUrl : "";
 
     const now = Date.now();
     const reqRef = db.ref("deposit_requests").push();
 
-    // Save FULL request with all info for admin
     await reqRef.set({
       uid: currentUser.uid,
       publicUid: userData.publicUid || "",
@@ -1494,7 +1586,8 @@ async function submitDepositRequest() {
       adminNumber: adminNumber,
       adminName: isAutoMode ? "" : adminName,
       userWalletNumber: userNum,
-      mode: isAutoMode ? "auto" : "manual",
+      mode: mode,
+      merchantUrl: merchantUrl,
       userConfirmed: true,
       userConfirmedAt: now,
       status: "pending",
@@ -1576,7 +1669,7 @@ function initDepositListener() {
 }
 
 /* ============================================================
-   IN-APP MERCHANT OVERLAY (Waiting / Approved / Rejected)
+   IN-APP MERCHANT OVERLAY (FIXED: PAY NOW IN OVERLAY)
 ============================================================ */
 let mchReqId = null;
 let mchReqData = null;
@@ -1631,12 +1724,25 @@ function mchShowWaiting() {
   $("mchWaitAmt").innerText = "Rs " + (Number(mchReqData?.amount) || 0).toLocaleString();
   $("mchWaitMethod").innerText = mchReqData?.method || "—";
   $("mchWaitStatus").innerText = (mchReqData?.status || "pending").toUpperCase().replace("_", " ");
+
+  // NEW: Show Pay Now button if request is in merchant_url mode
+  const payWrap = $("mchPayNowWrap");
+  const payBtn = $("mchPayNowBtn");
+  const url = String(mchReqData?.merchantUrl || "").trim();
+  if (payWrap && payBtn) {
+    if ((mchReqData?.mode === "merchant_url") && url) {
+      payBtn.href = url;
+      payWrap.classList.remove("hide");
+    } else {
+      payWrap.classList.add("hide");
+    }
+  }
+
   mchStartTimer();
 }
 
 function mchStartTimer() {
   mchExpiresAt = Number(mchReqData?.expiresAt) || (Date.now() + 10 * 60 * 1000);
-  const totalMs = Math.max(1, mchExpiresAt - (mchReqData?.createdAt || Date.now()));
   const tick = () => {
     const left = mchExpiresAt - Date.now();
     if (left <= 0) {
@@ -1816,6 +1922,276 @@ async function redeemGift() {
 function openGenericModal(title) { $("genericModalTitle").innerText = title; $("genericModal").classList.remove("hide"); }
 function closeGenericModal() { $("genericModal").classList.add("hide"); }
 
+/* ============================================================
+   ⚡ QUICK CUSTOMER SERVICE (WhatsApp-style)
+============================================================ */
+let qsCurrentCategory = null;
+let qsCurrentCategoryLabel = "";
+let qsTicketCounter = 0;
+
+function openQuickService() {
+  if (!currentUser) return toast("Please login first");
+  $("quickServiceModal").classList.remove("hide");
+  if (!$("qsChatBody").innerHTML.trim()) {
+    initQuickServiceChat();
+  }
+}
+
+function closeQuickService() {
+  $("quickServiceModal").classList.add("hide");
+}
+
+function qsReset() {
+  $("qsChatBody").innerHTML = "";
+  qsCurrentCategory = null;
+  qsCurrentCategoryLabel = "";
+  initQuickServiceChat();
+}
+
+function initQuickServiceChat() {
+  qsAddBotMessage("Hi " + (userData?.name || "there") + "! 👋\nWelcome to 92Blue Support.\n\nHow can we help you today?");
+  setTimeout(() => {
+    qsAddQuickButtons([
+      { label: "💰 Deposit Not Received", category: "deposit_not_received" },
+      { label: "💸 Withdrawal Problem", category: "withdrawal_problem" },
+      { label: "❓ Other Problem", category: "other_problem" }
+    ]);
+  }, 300);
+}
+
+function qsAddBotMessage(text) {
+  const body = $("qsChatBody");
+  const div = document.createElement("div");
+  div.className = "flex gap-2 mb-2";
+  div.innerHTML = `
+    <div class="w-8 h-8 bg-[#2563eb] text-white rounded-full flex items-center justify-center text-xs flex-shrink-0"><i class="fa-solid fa-headset"></i></div>
+    <div class="bg-white rounded-2xl rounded-tl-sm p-3 max-w-[80%] shadow-sm">
+      <p class="text-xs text-gray-800 whitespace-pre-line leading-relaxed">${esc(text)}</p>
+    </div>
+  `;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function qsAddUserMessage(text) {
+  const body = $("qsChatBody");
+  const div = document.createElement("div");
+  div.className = "flex justify-end mb-2";
+  div.innerHTML = `
+    <div class="bg-[#d9fdd3] rounded-2xl rounded-tr-sm p-3 max-w-[80%] shadow-sm">
+      <p class="text-xs text-gray-800 whitespace-pre-line leading-relaxed">${esc(text)}</p>
+    </div>
+  `;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function qsAddQuickButtons(buttons) {
+  const body = $("qsChatBody");
+  const div = document.createElement("div");
+  div.className = "ml-10 mb-2 space-y-2";
+  div.innerHTML = buttons.map(b => `
+    <button onclick="qsSelectCategory('${b.category}', '${esc(b.label).replace(/'/g, "&apos;")}')" class="block w-full bg-white text-left px-3 py-2.5 rounded-xl shadow-sm border-2 border-[#2563eb]/20 text-xs font-black text-[#2563eb] active:scale-95 transition">
+      ${esc(b.label)}
+    </button>
+  `).join("");
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function qsSelectCategory(category, label) {
+  if (category === "_back") {
+    qsAddUserMessage("Back to main menu");
+    setTimeout(() => {
+      qsAddBotMessage("Sure! Here are the categories again:");
+      qsAddQuickButtons([
+        { label: "💰 Deposit Not Received", category: "deposit_not_received" },
+        { label: "💸 Withdrawal Problem", category: "withdrawal_problem" },
+        { label: "❓ Other Problem", category: "other_problem" }
+      ]);
+    }, 400);
+    return;
+  }
+
+  qsCurrentCategory = category;
+  qsCurrentCategoryLabel = label;
+  qsAddUserMessage(label);
+
+  // Remove any existing quick buttons
+  document.querySelectorAll("#qsChatBody .ml-10").forEach(el => el.remove());
+
+  setTimeout(() => {
+    qsAddBotMessage(qsFormPromptFor(category));
+    setTimeout(() => qsShowForm(category), 300);
+  }, 400);
+}
+
+function qsFormPromptFor(cat) {
+  switch (cat) {
+    case "deposit_not_received": return "Please provide the following details so we can investigate your deposit:\n\n📝 Fill the form below:";
+    case "withdrawal_problem": return "We'll help with your withdrawal issue. Please provide:\n\n📝 Fill the form below:";
+    case "other_problem": return "Please describe your problem in detail:\n\n📝 Fill the form below:";
+    default: return "Please provide details:";
+  }
+}
+
+function qsShowForm(cat) {
+  const body = $("qsChatBody");
+  const div = document.createElement("div");
+  div.className = "ml-10 mb-2";
+  div.id = "qsFormWrap";
+
+  let fieldsHtml = "";
+  if (cat === "deposit_not_received") {
+    fieldsHtml = `
+      <div class="space-y-2">
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Deposit Amount (Rs)</label>
+          <input type="number" id="qsDepAmt" placeholder="e.g. 500" class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs font-bold outline-none focus:border-[#2563eb]">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Transaction ID</label>
+          <input type="text" id="qsDepTxn" placeholder="From Easypaisa/JazzCash SMS" class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs font-bold outline-none focus:border-[#2563eb]">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Payment Method</label>
+          <select id="qsDepMethod" class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs font-bold outline-none">
+            <option value="Easypaisa">Easypaisa</option>
+            <option value="JazzCash">JazzCash</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Problem Description</label>
+          <textarea id="qsDepDesc" rows="2" placeholder="Describe your issue briefly..." class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs outline-none focus:border-[#2563eb]"></textarea>
+        </div>
+      </div>
+    `;
+  } else if (cat === "withdrawal_problem") {
+    fieldsHtml = `
+      <div class="space-y-2">
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Withdrawal Amount (Rs)</label>
+          <input type="number" id="qsWdAmt" placeholder="e.g. 1000" class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs font-bold outline-none focus:border-[#2563eb]">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Method</label>
+          <select id="qsWdMethod" class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs font-bold">
+            <option value="Easypaisa">Easypaisa</option>
+            <option value="JazzCash">JazzCash</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Problem Description</label>
+          <textarea id="qsWdDesc" rows="2" placeholder="Describe your issue..." class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs outline-none focus:border-[#2563eb]"></textarea>
+        </div>
+      </div>
+    `;
+  } else {
+    fieldsHtml = `
+      <div class="space-y-2">
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Subject</label>
+          <input type="text" id="qsOtherSubject" placeholder="Brief subject" class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs font-bold outline-none focus:border-[#2563eb]">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-gray-600 uppercase mb-1 block">Problem Description</label>
+          <textarea id="qsOtherDesc" rows="3" placeholder="Describe your problem in detail..." class="w-full p-2.5 bg-gray-50 border rounded-lg text-xs outline-none focus:border-[#2563eb]"></textarea>
+        </div>
+      </div>
+    `;
+  }
+
+  div.innerHTML = `
+    <div class="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm">
+      ${fieldsHtml}
+      <p id="qsFormErr" class="text-[10px] text-red-500 font-bold min-h-[14px] mt-1"></p>
+      <button onclick="qsSubmitForm()" class="w-full mt-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-2.5 rounded-full text-xs font-black active:scale-95 transition">
+        <i class="fa-solid fa-paper-plane mr-1"></i> SUBMIT COMPLAINT
+      </button>
+    </div>
+  `;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+async function qsSubmitForm() {
+  const err = $("qsFormErr");
+  err.innerText = "";
+
+  try {
+    let payload = {
+      uid: currentUser.uid,
+      publicUid: userData?.publicUid || "",
+      userName: userData?.name || "",
+      phone: userData?.phone || "",
+      category: qsCurrentCategory,
+      categoryLabel: qsCurrentCategoryLabel,
+      status: "open",
+      priority: qsCurrentCategory === "deposit_not_received" ? "high" : "normal",
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    if (qsCurrentCategory === "deposit_not_received") {
+      const amt = Number($("qsDepAmt").value) || 0;
+      const txn = $("qsDepTxn").value.trim();
+      const method = $("qsDepMethod").value;
+      const desc = $("qsDepDesc").value.trim();
+      if (amt <= 0) return err.innerText = "Enter valid amount";
+      if (!txn) return err.innerText = "Enter transaction ID";
+      if (!desc) return err.innerText = "Describe your problem";
+      payload.amount = amt;
+      payload.transactionId = txn;
+      payload.method = method;
+      payload.description = desc;
+    } else if (qsCurrentCategory === "withdrawal_problem") {
+      const amt = Number($("qsWdAmt").value) || 0;
+      const method = $("qsWdMethod").value;
+      const desc = $("qsWdDesc").value.trim();
+      if (amt <= 0) return err.innerText = "Enter valid amount";
+      if (!desc) return err.innerText = "Describe your problem";
+      payload.amount = amt;
+      payload.method = method;
+      payload.description = desc;
+    } else {
+      const subject = $("qsOtherSubject").value.trim();
+      const desc = $("qsOtherDesc").value.trim();
+      if (!subject) return err.innerText = "Enter subject";
+      if (!desc) return err.innerText = "Describe your problem";
+      payload.subject = subject;
+      payload.description = desc;
+    }
+
+    showLoader("Sending...");
+    const ref = db.ref("support_tickets").push();
+    await ref.set(payload);
+    hideLoader();
+
+    // Remove form
+    const formWrap = $("qsFormWrap");
+    if (formWrap) formWrap.remove();
+
+    const ticketId = String(ref.key || "").slice(-8).toUpperCase();
+    qsAddUserMessage("Submitted ✓");
+    qsAddBotMessage(`✅ Your complaint has been submitted successfully!\n\n🎫 Ticket #: ${ticketId}\n\nOur admin team will review your issue and respond shortly. You can check back later for updates.\n\nThank you for your patience! 🙏`);
+
+    setTimeout(() => {
+      qsAddQuickButtons([
+        { label: "🔙 Back to main menu", category: "_back" }
+      ]);
+    }, 500);
+
+    qsCurrentCategory = null;
+    qsCurrentCategoryLabel = "";
+  } catch (e) {
+    hideLoader();
+    err.innerText = "Failed: " + (e.message || "Unknown error");
+  }
+}
+
+/* ============================================================
+   EXISTING MODALS (unchanged)
+============================================================ */
 async function openBettingHistory() {
   openGenericModal("Bet History");
   $("genericModalBody").innerHTML = "<p class='text-center text-gray-400 py-4'>Loading...</p>";
@@ -2137,6 +2513,7 @@ async function claimDailyCheckIn() {
 $("genericModal").addEventListener("click", (e) => { if (e.target === $("genericModal")) closeGenericModal(); });
 $("walletBindModal").addEventListener("click", (e) => { if (e.target === $("walletBindModal")) closeWalletBindModal(); });
 $("walletChangeModal").addEventListener("click", (e) => { if (e.target === $("walletChangeModal")) closeWalletChangeModal(); });
+$("quickServiceModal").addEventListener("click", (e) => { if (e.target === $("quickServiceModal")) closeQuickService(); });
 
 switchAuthView("login");
 </script>
