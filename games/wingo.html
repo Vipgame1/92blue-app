@@ -218,12 +218,12 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 <div class="mod" id="how"><div class="mc"><div class="mh">• Wingo Rule •</div><div class="mbd">
 <p>1 minute 1 issue, 55 seconds to order, 5 seconds waiting for the draw. It opens all day. The total number of trades is 1440 issues.</p>
 <p>If you spend 100 to trade, after deducting a 2 service fee, your contract amount is 98:</p>
-<p><b>1.Select green:</b> If the result shows 1, 3, 7, 9, you will get (98 * 2) 196; If the result shows 5, you will get (98 * 1.5) 147.</p>
-<p><b>2.Select red:</b> If the result shows 2, 4, 6, 8, you will get (98 * 2) 196; If the result shows 0, you will get (98 * 1.5) 147.</p>
+<p><b>1.Select green:</b> If the result shows 1, 3, 7, 9, you will get (98 * 2) 198; If the result shows 5, you will get (98 * 1.5) 147.</p>
+<p><b>2.Select red:</b> If the result shows 2, 4, 6, 8, you will get (98 * 2) 198; If the result shows 0, you will get (98 * 1.5) 147.</p>
 <p><b>3.Select violet:</b> If the result shows 0 or 5, you will get (98 * 4.5) 441.</p>
 <p><b>4.Select number:</b> If the result is the same as the number you selected, you will get (98 * 9) 882.</p>
-<p><b>5.Select big:</b> If the result shows 5, 6, 7, 8, 9, you will get (98 * 2) 196.</p>
-<p><b>6.Select small:</b> If the result shows 0, 1, 2, 3, 4, you will get (98 * 2) 196.</p>
+<p><b>5.Select big:</b> If the result shows 5, 6, 7, 8, 9, you will get (98 * 2) 198.</p>
+<p><b>6.Select small:</b> If the result shows 0, 1, 2, 3, 4, you will get (98 * 2) 198.</p>
 </div><div class="mf"><button id="howClose">Close</button></div></div></div>
 
 <div class="wp" id="wp">
@@ -250,9 +250,6 @@ table{width:100%;background:#fff;border-collapse:collapse;font-size:14px}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============================================================
-   FIREBASE
-============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyDAjCe1sI0wEW737ZbnTDGietZeSkHDtmw",
   authDomain: "sellershop-bda2e.firebaseapp.com",
@@ -269,10 +266,6 @@ const FB_TS = firebase.database.ServerValue.TIMESTAMP;
 
 let USER_UID = null;
 let BALANCE = 0;
-
-/* ============================================================
-   ADMIN OVERRIDE — Only for 3-minute mode (index 2)
-   ============================================================ */
 let ADMIN_OVERRIDES = {};
 
 function loadAdminOverrides() {
@@ -301,9 +294,6 @@ function watchAdminOverrides() {
   });
 }
 
-/* ============================================================
-   BALANCE HELPERS
-============================================================ */
 function fbDebit(amount, meta) {
   meta = meta || {};
   amount = Number(amount);
@@ -352,9 +342,6 @@ function fbLogBet(modeIdx, sel, amount, period) {
   }).then(function() { return ref.key; });
 }
 
-/* ============================================================
-   AUTH GUARD
-============================================================ */
 fbAuth.onAuthStateChanged(async function(user) {
   if (!user) { location.href = "../index.html?auth=1"; return; }
   const snap = await fbDB.ref("users/" + user.uid).once("value");
@@ -384,9 +371,6 @@ fbAuth.onAuthStateChanged(async function(user) {
   startGame();
 });
 
-/* ============================================================
-   GAME
-============================================================ */
 function startGame() {
 const $=id=>document.getElementById(id);
 
@@ -420,63 +404,72 @@ const col=n=>n%2?'green':'red';
 const isBig=n=>n>=5;
 
 const S=MODES.map(m=>{
-  let h=[];
-  try{h=JSON.parse(localStorage.getItem('wg_'+m.api)||'[]')}catch(e){}
-  return {hist:h,top:h.length?h[0].p:null,next:0,shown:100,idx:null,busy:false};
+  return {hist:[],top:null,next:0,shown:100,idx:null,busy:false};
 });
 
-try{
-  bets=JSON.parse(localStorage.getItem('wg_bets')||'[]');
-}catch(e){}
+bets = [];
 
-function saveAcc(){
-  try{
-    localStorage.setItem('wg_bets',JSON.stringify(bets));
-  }catch(e){}
-}
 function save(i){
-  try{localStorage.setItem('wg_'+MODES[i].api,JSON.stringify(S[i].hist))}catch(e){}
+  // Local Storage removed
+}
+
+async function loadMyBets() {
+  if (!USER_UID) { bets = []; return; }
+  try {
+    const snap = await fbDB.ref("bettingHistory/" + USER_UID).once("value");
+    const all = snap.val() || {};
+    bets = Object.entries(all)
+      .filter(function(pair) { return pair[1] && pair[1].game === "wingo"; })
+      .map(function(pair) {
+        const fbKey = pair[0];
+        const b = pair[1];
+        const amt = Number(b.amount) || 0;
+        const st = String(b.status || "").toUpperCase();
+        return {
+          mode: Number(b.mode !== undefined ? b.mode : 0),
+          p: String(b.period || ""),
+          sel: b.selection,
+          total: amt,
+          contract: amt * 0.98,
+          status: st === "WIN" ? "win" : st === "LOSE" ? "lose" : "pending",
+          bonus: Number(b.payout) || 0,
+          n: (b.result !== undefined && b.result !== null) ? b.result : null,
+          t: Number(b.ts) || Date.now(),
+          fbKey: fbKey
+        };
+      })
+      .sort(function(a, b) { return b.t - a.t; });
+    renderMine();
+  } catch(e) { bets = []; }
 }
 
 function mult(sel,n){
-  if(typeof sel==='number')return sel===n?9:0;
-  if(sel==='green')return [1,3,7,9].includes(n)?2:n===5?1.5:0;
-  if(sel==='red')return [2,4,6,8].includes(n)?2:n===0?1.5:0;
-  if(sel==='violet')return(n===0||n===5)?4.5:0;
-  if(sel==='big')return n>=5?2:0;
-  return n<=4?2:0;
+  const s = String(sel).toLowerCase();
+  const num = parseInt(s);
+  if(!isNaN(num) && String(num) === s) return num===n?9:0;
+  if(s==='green')return [1,3,7,9].includes(n)?2:n===5?1.5:0;
+  if(s==='red')return [2,4,6,8].includes(n)?2:n===0?1.5:0;
+  if(s==='violet')return(n===0||n===5)?4.5:0;
+  if(s==='big')return n>=5?2:0;
+  if(s==='small')return n<=4?2:0;
+  return 0;
 }
 
-/* ============================================================
-   RESULT RESOLVER
-   ============================================================ */
 function get30sResult(p){
   const salt='MKS-wingo-30s-v2|'+p;
   let h=1779033703^salt.length;
-  for(let i=0;i<salt.length;i++){
-    h=Math.imul(h^salt.charCodeAt(i),3432918353);
-    h=(h<<13)|(h>>>19);
-  }
-  h=Math.imul(h^(h>>>16),2246822507);
-  h=Math.imul(h^(h>>>13),3266489909);
-  h^=h>>>16;
-  h=Math.imul(h^(h>>>15),2654435761);
-  h^=h>>>13;
+  for(let i=0;i<salt.length;i++){h=Math.imul(h^salt.charCodeAt(i),3432918353);h=(h<<13)|(h>>>19);}
+  h=Math.imul(h^(h>>>16),2246822507);h=Math.imul(h^(h>>>13),3266489909);h^=h>>>16;
+  h=Math.imul(h^(h>>>15),2654435761);h^=h>>>13;
   return (h>>>0)%10;
 }
 
 function getRandomResult(p, modeIndex){
   const salt='MKS-wingo-v2|'+modeIndex+'|'+p;
   let h=1779033703^salt.length;
-  for(let i=0;i<salt.length;i++){
-    h=Math.imul(h^salt.charCodeAt(i),3432918353);
-    h=(h<<13)|(h>>>19);
-  }
-  h=Math.imul(h^(h>>>16),2246822507);
-  h=Math.imul(h^(h>>>13),3266489909);
-  h^=h>>>16;
-  h=Math.imul(h^(h>>>15),2654435761);
-  h^=h>>>13;
+  for(let i=0;i<salt.length;i++){h=Math.imul(h^salt.charCodeAt(i),3432918353);h=(h<<13)|(h>>>19);}
+  h=Math.imul(h^(h>>>16),2246822507);h=Math.imul(h^(h>>>13),3266489909);h^=h>>>16;
+  h=Math.imul(h^(h>>>15),2654435761);h^=h>>>13;
   return (h>>>0)%10;
 }
 
@@ -492,32 +485,21 @@ function updateRandomMode(modeIndex){
   const k = MODES[i].k * 1000;
   const curMs = nowMs();
   const list = [];
-  
   for(let step = 1; step <= 100; step++){
     const pastMs = curMs - (step * k);
     const p = pfAt(i, pastMs);
     const n = resolveResult(i, p);
     list.push({p, n});
   }
-  
   S[i].hist = list;
   S[i].top = list.length ? list[0].p : null;
-  save(i);
-
-  bets.filter(b => b.mode === i && b.status === 'pending').forEach(b => {
-    const h = S[i].hist.find(x => x.p === b.p);
-    if(h) settle(i, h.p, h.n, false);
-  });
-
+  
   if(cur === i) renderAll();
 }
 function update30sMode(){ updateRandomMode(0); }
 
 async function fetchMode(i){
-  if(i === 0 || i === 2 || i === 3){
-    updateRandomMode(i);
-    return;
-  }
+  if(i === 0 || i === 2 || i === 3){ updateRandomMode(i); return; }
   const st=S[i];
   if(st.busy)return;
   st.busy=true;
@@ -532,64 +514,21 @@ async function fetchMode(i){
       }catch(e){}
     }
     if(!r||!list.length)throw 0;
-
     const dh=r.headers.get('Date');
-    if(dh){
-      const t=Date.parse(dh);
-      if(t){const o=t+500-Date.now();if(!synced||Math.abs(o-off)>2000){off=o;synced=true}}
-    }
-
+    if(dh){const t=Date.parse(dh);if(t){const o=t+500-Date.now();if(!synced||Math.abs(o-off)>2000){off=o;synced=true}}}
     const have=new Set(st.hist.map(x=>x.p));
     list.forEach(x=>{
       const p=String(x.issueNumber),n=parseInt(x.number);
-      if(p&&p!=='undefined'&&!isNaN(n)&&!have.has(p)){
-        st.hist.push({p,n});
-      }
+      if(p&&p!=='undefined'&&!isNaN(n)&&!have.has(p)){st.hist.push({p,n});}
     });
-
     st.hist.sort((a,b)=>a.p<b.p?1:a.p>b.p?-1:0);
     st.hist=st.hist.slice(0,100);
     st.top=st.hist.length?st.hist[0].p:null;
-    save(i);
-
-    bets.filter(b=>b.mode===i&&b.status==='pending').forEach(b=>{
-      const h=st.hist.find(x=>x.p===b.p);
-      if(h)settle(i,h.p,h.n,false);
-    });
-
     if(i===cur)renderAll();
   }catch(e){}
   finally{st.busy=false}
 }
 
-/* ============================================================
-   SETTLE — No local double modification
-   ============================================================ */
-function settle(m,p,n,fromAutoSettle){
-  const mine=bets.filter(b=>b.mode===m&&b.p===p&&b.status==='pending');
-  if(!mine.length)return;
-  let total=0,win=0;
-  mine.forEach(b=>{
-    const x=mult(b.sel,n);
-    const fee = Math.max(2, b.total * 0.02);
-    b.bonus = x > 0 ? (b.total * x) - fee : 0;
-    b.n=n;
-    b.status=x>0?'win':'lose';
-    total+=b.total;
-    win+=b.bonus;
-  });
-  mine.forEach(b => {
-    if(b.fbKey) settleBetAtomic(b.fbKey, n).catch(function(){});
-  });
-  if(!fromAutoSettle){
-    showWin(win>0, win>0 ? win : total, m, p, n);
-  }
-  renderMine();
-}
-
-/* ============================================================
-   SETTLE BET ATOMIC — With auto refresh after win
-   ============================================================ */
 async function settleBetAtomic(betKey, result){
   if(!USER_UID) return;
   const betRef = fbDB.ref("bettingHistory/" + USER_UID + "/" + betKey);
@@ -622,9 +561,7 @@ async function settleBetAtomic(betKey, result){
     refreshBalanceFromFirebase();
   }
 }
-/* ============================================================
-   REFRESH BALANCE FROM FIREBASE
-   ============================================================ */
+
 async function refreshBalanceFromFirebase() {
   if (!USER_UID) return;
   try {
@@ -636,9 +573,6 @@ async function refreshBalanceFromFirebase() {
   } catch(e) {}
 }
 
-/* ============================================================
-   AUTO-SETTLE FROM FIREBASE
-   ============================================================ */
 async function autoSettleFromFirebase(){
   if(!USER_UID) return;
   try {
@@ -646,44 +580,70 @@ async function autoSettleFromFirebase(){
     const all = snap.val() || {};
     const now = Date.now();
     let anySettled = false;
-
+    let hasWin = false;
+    let winAmount = 0;
+    let hasLoss = false;
+    let lossAmount = 0;
+    let lastMode = 2;
+    let lastPeriod = "";
+    let lastNum = 0;
+    
     for (const [fbKey, bet] of Object.entries(all)) {
       if (!bet || bet.game !== "wingo") continue;
       if (String(bet.status || "").toUpperCase() !== "PENDING") continue;
-
       const modeIdx = Number(bet.mode !== undefined ? bet.mode : 0);
       const period = String(bet.period || "");
       if (!period) continue;
-
       const currentPeriod = pfAt(modeIdx, now);
       if (period >= currentPeriod) continue;
-
-      const n = resolveResult(modeIdx, period);
+      
+      let n = null;
+      // Direct Firebase Override fetch for accuracy
+      if (modeIdx === 2) {
+        const oSnap = await fbDB.ref("wingo_results/2/" + period).once("value");
+        if (oSnap.exists()) n = Number(oSnap.val());
+      }
+      if (n === null) {
+        n = resolveResult(modeIdx, period);
+      }
+      
       await settleBetAtomic(fbKey, n);
       anySettled = true;
-
+      
+      const x = mult(bet.selection, n);
+      if (x > 0) {
+        hasWin = true;
+        const amt = Number(bet.amount) || 0;
+        const fee = Math.max(2, amt * 0.02);
+        winAmount += (amt * x) - fee;
+      } else {
+        hasLoss = true;
+        lossAmount += (Number(bet.amount) || 0);
+      }
+      lastMode = modeIdx;
+      lastPeriod = period;
+      lastNum = n;
+      
       const localBet = bets.find(b => b.fbKey === fbKey);
       if (localBet) {
-        const x = mult(localBet.sel, n);
+        const fee = Math.max(2, localBet.total * 0.02);
         localBet.status = x > 0 ? "win" : "lose";
-        localBet.bonus = localBet.contract * x;
+        localBet.bonus = x > 0 ? (localBet.total * x) - fee : 0;
         localBet.n = n;
       }
     }
-
     if (anySettled) {
-      saveAcc();
       renderMine();
       refreshBalanceFromFirebase();
+      if (hasWin) {
+        showWin(true, winAmount, lastMode, lastPeriod, lastNum);
+      } else if (hasLoss) {
+        showWin(false, lossAmount, lastMode, lastPeriod, lastNum);
+      }
     }
-  } catch(e) {
-    console.error("[Wingo] autoSettle error:", e);
-  }
+  } catch(e) { console.error("[Wingo] autoSettle error:", e); }
 }
 
-/* ============================================================
-   AUDIO
-   ============================================================ */
 let AC=null,lastBeep=0;
 function audio(){
   try{
@@ -700,25 +660,14 @@ function playTick(rem){
     const t=AC.currentTime;
     const o=AC.createOscillator();
     const g=AC.createGain();
-    
     if(rem===1){
-      o.type='sine';
-      o.frequency.setValueAtTime(1200,t);
-      g.gain.setValueAtTime(0.35,t);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
-      o.connect(g);
-      g.connect(AC.destination);
-      o.start(t);
-      o.stop(t+0.22);
+      o.type='sine';o.frequency.setValueAtTime(1200,t);
+      g.gain.setValueAtTime(0.35,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
+      o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+0.22);
     }else{
-      o.type='triangle';
-      o.frequency.setValueAtTime(750,t);
-      g.gain.setValueAtTime(0.4,t);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
-      o.connect(g);
-      g.connect(AC.destination);
-      o.start(t);
-      o.stop(t+0.09);
+      o.type='triangle';o.frequency.setValueAtTime(750,t);
+      g.gain.setValueAtTime(0.4,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+      o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+0.09);
     }
   }catch(e){}
 }
@@ -731,28 +680,21 @@ function tick(){
       st.idx=cp;
       if(i===0 || i===2 || i===3) updateRandomMode(i);
       if(i===cur)renderAll();
+      if(i===2) autoSettleFromFirebase(); // Instant settle on period change
     }
-    if(i===0 || i===2 || i===3){
-      updateRandomMode(i);
-    } else {
+    if(i===0 || i===2 || i===3){ updateRandomMode(i); }
+    else {
       const need=i===cur||bets.some(b=>b.mode===i&&b.status==='pending');
       const want=pfAt(i,nowMs()-m.k*1000);
       if(need&&st.top!==want&&now>=st.next){st.next=now+((s%m.k)<25?1500:6000);fetchMode(i)}
     }
   });
-
   const k=MODES[cur].k,rem=k-Math.floor(s%k),mm=p2(Math.floor(rem/60)),ss=p2(rem%60);
   $('d0').textContent=mm[0];$('d1').textContent=mm[1];$('d2').textContent=ss[0];$('d3').textContent=ss[1];
-  
   const lk=rem<=5;
   $('lock').classList.toggle('show',lk);
-  
-  if(lk&&rem!==lastBeep){
-    lastBeep=rem;
-    playTick(rem);
-  }
+  if(lk&&rem!==lastBeep){lastBeep=rem;playTick(rem);}
   if(!lk)lastBeep=0;
-
   if(lk){
     $('l0').textContent='0';$('l1').textContent=rem;
     if(sheet)closeSheet();
@@ -761,19 +703,10 @@ function tick(){
 }
 setInterval(tick,250);
 
-function updBal(){saveAcc();$('bal').textContent='Rs'+balance.toFixed(2)}
+function updBal(){$('bal').textContent='Rs'+balance.toFixed(2)}
 
-window.__wingoBalanceUpdate = function(newBal) {
-  balance = newBal;
-  updBal();
-};
-
-window.__wingoRerender = function() {
-  if(cur === 2){
-    updateRandomMode(2);
-    renderAll();
-  }
-};
+window.__wingoBalanceUpdate = function(newBal){balance = newBal;updBal();};
+window.__wingoRerender = function(){if(cur === 2){updateRandomMode(2);renderAll();}};
 
 function renderModes(){
   $('modes').innerHTML=MODES.map((m,i)=>`<div class="mode ${i===cur?'on':''}" data-i="${i}"><div class="ci"><i class="fa-regular fa-clock"></i></div>${m.lab}</div>`).join('');
@@ -783,11 +716,11 @@ function renderModes(){
 function renderAll(){
   const h=S[cur].hist;
   $('mname').textContent=MODES[cur].name;
-  $('topBalls').innerHTML=h.slice(0,5).map((r,i)=>ball(r.n,'t'+i,'mini')).join('');$('hbody').innerHTML=h.slice(0,S[cur].shown).map(r=>{
+  $('topBalls').innerHTML=h.slice(0,5).map((r,i)=>ball(r.n,'t'+i,'mini')).join('');
+  $('hbody').innerHTML=h.slice(0,S[cur].shown).map(r=>{
     const d=r.n===0||r.n===5;
     return `<tr><td>${r.p}</td><td><span class="hn ${d?'n'+r.n:col(r.n)==='green'?'g':'r'}">${r.n}</span></td><td>${isBig(r.n)?'Big':'Small'}</td><td><span class="dot d-${col(r.n)}"></span>${d?'<span class="dot d-violet"></span>':''}</td></tr>`;
   }).join('');
-  
   $('more').style.display=h.length>S[cur].shown?'block':'none';
   renderChart();
   renderMine();
@@ -799,13 +732,12 @@ function renderChart(){
   const fr=Array(10).fill(0),ms=Array(10).fill(L),mc=Array(10).fill(0);
   h.forEach((r,i)=>{fr[r.n]++;if(ms[r.n]===L)ms[r.n]=i});
   for(let i=0,run=0;i<L;i++){run=(i&&h[i].n===h[i-1].n)?run+1:1;mc[h[i].n]=Math.max(mc[h[i].n],run)}
-  
   const row=(t,a)=>`<tr><td>${t}</td>${a.map(v=>`<td>${v}</td>`).join('')}</tr>`;
   $('stat').innerHTML=`<tr><td>Statistic</td><td colspan="10" style="text-align:left;color:#888">(last ${L} Periods)</td></tr>`+
    `<tr><td>Winning Numbers</td>${[0,1,2,3,4,5,6,7,8,9].map(n=>`<td><span class="sc">${n}</span></td>`).join('')}</tr>`+
    row('Missing',ms)+row('Avg missing',fr.map(f=>Math.floor(L/(f+1))))+row('Frequency',fr)+row('Max consecutive',mc);
-   
-  $('cg').querySelectorAll('.cr').forEach(e=>e.remove());$('cg').insertAdjacentHTML('beforeend',h.slice(0,10).map(r=>{
+  $('cg').querySelectorAll('.cr').forEach(e=>e.remove());
+  $('cg').insertAdjacentHTML('beforeend',h.slice(0,10).map(r=>{
     let nodes='';for(let i=0;i<10;i++){let c='nd';if(i===r.n)c+=r.n===0?' d0':r.n===5?' d5':' '+col(i);nodes+=`<span class="${c}">${i}</span>`}
     return `<div class="cr"><span class="cp">${r.p}</span><div class="cn">${nodes}</div><span class="bd ${isBig(r.n)?'bB':'bS'}">${isBig(r.n)?'B':'S'}</span></div>`;
   }).join(''));
@@ -825,21 +757,24 @@ function trend(){
   svg.innerHTML=pts.length?`<polyline points="${pts.join(' ')}" fill="none" stroke="#fd565c" stroke-width="1.5"/>`:'';
 }
 
-const selName=s=>typeof s==='number'?s:s[0].toUpperCase()+s.slice(1);
+const selName=s=>{
+  if(s===undefined || s===null || s==="") return "?";
+  const num = parseInt(s);
+  if(!isNaN(num) && String(num) === String(s)) return num;
+  return String(s)[0].toUpperCase()+String(s).slice(1);
+};
 const pad=n=>String(n).padStart(2,'0');
 const fdt=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
 
 function renderMine(){
-  saveAcc();
   const b=bets.filter(x=>x.mode===cur);
   if(!b.length){$('pM').innerHTML='<div class="empty">No betting history available yet.</div>';return}
-  
   $('pM').innerHTML='<div class="card mine"><div class="mhead"><span class="det">Detail <i class="fa-regular fa-circle-right"></i></span></div>'+b.map((x)=>{
     const st=x.status,cls=st==='win'?'win':st==='lose'?'lose':'pend';
     const lab=st==='win'?'Succeed':st==='lose'?'Failed':'Waiting';
     const amt=st==='win'?'+Rs'+x.bonus.toFixed(2):st==='lose'?'-Rs'+x.total.toFixed(2):'Rs'+x.total.toFixed(2);
     return `<div class="mi" onclick="this.classList.toggle('open')"><div class="mr"><div class="sq" style="background:${selColor(x.sel)}">${selName(x.sel)}</div><div class="mm"><div class="mp">${x.p}<i class="fa-solid fa-caret-down"></i></div><div class="mt">${fdt(new Date(x.t))}</div></div><div class="mrt"><div class="bg2 ${cls}">${lab}</div><div class="ma ${st==='win'?'g':st==='lose'?'r':''}">${amt}</div></div></div>
-    <div class="mx">Order amount: Rs${x.total.toFixed(2)}<br>Contract amount (after 2% fee): Rs${x.contract.toFixed(2)}<br>Result: ${x.n==null?'-':x.n+' ('+(isBig(x.n)?'Big':'Small')+')'}</div></div>`;
+    <div class="mx">Order amount: Rs${x.total.toFixed(2)}<br>Fee: Rs${Math.max(2, x.total * 0.02).toFixed(2)}<br>Result: ${x.n==null?'-':x.n+' ('+(isBig(x.n)?'Big':'Small')+')'}</div></div>`;
   }).join('')+'</div>';
 }
 
@@ -852,10 +787,18 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 });
 
 $('mrow').insertAdjacentHTML('beforeend',MULTS.map(m=>`<button class="mb ${m===1?'on':''}" data-m="${m}">X${m}</button>`).join(''));
-$('mrow').querySelectorAll('.mb').forEach(b=>b.onclick=()=>{pageMult=+b.dataset.m;$('mrow').querySelectorAll('.mb').forEach(x=>x.classList.toggle('on',x===b))});$('rnd').onclick=()=>openSheet(rnd());
+$('mrow').querySelectorAll('.mb').forEach(b=>b.onclick=()=>{pageMult=+b.dataset.m;$('mrow').querySelectorAll('.mb').forEach(x=>x.classList.toggle('on',x===b))});
+$('rnd').onclick=()=>openSheet(rnd());
 
 const SC={green:'#18b688',red:'#ff4d5a',violet:'#b652ee',big:'#fea84f',small:'#6ba6f2'};
-function selColor(s){return typeof s==='number'?(BM[s].length>1?BC.violet.mid:col(s)==='red'?'#ff4d5a':'#18b688'):SC[s]}
+function selColor(s){
+  if(s===undefined || s===null || s==="") return '#999';
+  const num = parseInt(s);
+  if(!isNaN(num) && String(num) === String(s)){
+    return (BM[num] && BM[num].length>1) ? BC.violet.mid : (col(num)==='red'?'#ff4d5a':'#18b688');
+  }
+  return SC[s] || '#999';
+}
 
 function openSheet(sel){
   const rem=MODES[cur].k-Math.floor(secs()%MODES[cur].k);
@@ -866,39 +809,34 @@ function openSheet(sel){
   $('bchips').innerHTML=[1,10,100,1000].map(v=>`<button class="chip ${v===1?'on':''}" data-v="${v}" style="${v===1?'background:'+c:''}">${v}</button>`).join('');
   $('mchips').innerHTML=MULTS.map(v=>`<button class="chip ${v===pageMult?'on':''}" data-v="${v}" style="${v===pageMult?'background:'+c:''}">X${v}</button>`).join('');
   $('qm').style.background=$('qp').style.background=c;$('qin').value=1;
-  $('bchips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{sheet.base=+b.dataset.v;pick('bchips',b,c);upd()});$('mchips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{sheet.mult=+b.dataset.v;pick('mchips',b,c);upd()});
+  $('bchips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{sheet.base=+b.dataset.v;pick('bchips',b,c);upd()});
+  $('mchips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{sheet.mult=+b.dataset.v;pick('mchips',b,c);upd()});
   upd();$('ov').classList.add('show');$('sheet').classList.add('show');
 }
 
 function pick(id,b,c){$(id).querySelectorAll('.chip').forEach(x=>{x.classList.remove('on');x.style.background=''});b.classList.add('on');b.style.background=c}
 const total=()=>sheet.base*sheet.qty*sheet.mult;
-function upd(){$('okBtn').textContent='Total amount Rs'+total().toFixed(2)}$('qm').onclick=()=>{sheet.qty=Math.max(1,sheet.qty-1);$('qin').value=sheet.qty;upd()};$('qp').onclick=()=>{sheet.qty++;$('qin').value=sheet.qty;upd()};$('qin').oninput=e=>{sheet.qty=Math.max(1,parseInt(e.target.value)||1);upd()};
+function upd(){$('okBtn').textContent='Total amount Rs'+total().toFixed(2)}
+$('qm').onclick=()=>{sheet.qty=Math.max(1,sheet.qty-1);$('qin').value=sheet.qty;upd()};
+$('qp').onclick=()=>{sheet.qty++;$('qin').value=sheet.qty;upd()};
+$('qin').oninput=e=>{sheet.qty=Math.max(1,parseInt(e.target.value)||1);upd()};
 function closeSheet(){sheet=null;$('ov').classList.remove('show');$('sheet').classList.remove('show')}
 
-/* ============================================================
-   BET BUTTON — With 4x auto balance refresh
-   ============================================================ */
 $('okBtn').onclick=async()=>{
   if(!sheet)return;
   const rem=MODES[cur].k-Math.floor(secs()%MODES[cur].k);
   if(rem<=5)return toast('Betting is closed for this round');
   const t=total();
   if(t>balance)return toast('Insufficient balance');
-  
   const period = pfAt(cur, nowMs());
   const savedSel = sheet.sel;
   const savedMode = cur;
-  
   let newBal;
   try {
     newBal = await fbDebit(t, { type: 'bet', note: selName(savedSel) + ' ' + period });
-  } catch(e) {
-    return toast(e.message || 'Bet failed');
-  }
-  
+  } catch(e) { return toast(e.message || 'Bet failed'); }
   let fbKey = null;
   try { fbKey = await fbLogBet(savedMode, savedSel, t, period); } catch(e) {}
-  
   balance = newBal;
   updBal();
   bets.unshift({
@@ -906,11 +844,7 @@ $('okBtn').onclick=async()=>{
     contract: t*0.98, status: 'pending', bonus: 0,
     t: Date.now(), n: null, fbKey: fbKey
   });
-  closeSheet();
-  toast('Bet successful');
-  renderMine();
-  
-  // ✅ Auto refresh balance 4 times — fix double-cut
+  closeSheet();toast('Bet successful');renderMine();
   refreshBalanceFromFirebase();
   setTimeout(refreshBalanceFromFirebase, 1000);
   setTimeout(refreshBalanceFromFirebase, 2000);
@@ -929,14 +863,8 @@ let autoCloseOn = false;
 function updateAutoCloseUI(){
   const icon = $('acIcon');
   const label = $('wsec');
-  if(autoCloseOn){
-    icon.className = 'fa-regular fa-circle-check';
-    icon.style.color = '#6dff95';
-  } else {
-    icon.className = 'fa-regular fa-circle-xmark';
-    icon.style.color = '#ff7b7b';
-    label.textContent = 'Auto close OFF';
-  }
+  if(autoCloseOn){icon.className = 'fa-regular fa-circle-check';icon.style.color = '#6dff95';}
+  else {icon.className = 'fa-regular fa-circle-xmark';icon.style.color = '#ff7b7b';label.textContent = 'Auto close OFF';}
 }
 
 function toggleAutoClose(){
@@ -949,16 +877,11 @@ function toggleAutoClose(){
     if(winTimer) clearInterval(winTimer);
     winTimer = setInterval(()=>{
       sec--;
-      if(sec <= 0){
-        clearInterval(winTimer);
-        winTimer = null;
-        closeWin();
-      } else {
-        label.textContent = sec + ' seconds auto close';
-      }
+      if(sec <= 0){clearInterval(winTimer);winTimer = null;closeWin();}
+      else {label.textContent = sec + ' seconds auto close';}
     }, 1000);
   } else {
-    if(winTimer){ clearInterval(winTimer); winTimer = null; }
+    if(winTimer){clearInterval(winTimer);winTimer = null;}
     updateAutoCloseUI();
   }
 }
@@ -974,40 +897,25 @@ function showWin(isWin,amt,m,p,n){
   $('wmode').textContent=MODES[m].name;
   $('wper').textContent='Period: '+p;
   $('wp').classList.add('show');
-  
   autoCloseOn = false;
-  if(winTimer){ clearInterval(winTimer); winTimer = null; }
+  if(winTimer){clearInterval(winTimer);winTimer = null;}
   updateAutoCloseUI();
-  
   if(isWin)drawConfetti();
 }
 
 function closeWin(){
-  if(winTimer){ clearInterval(winTimer); winTimer = null; }
+  if(winTimer){clearInterval(winTimer);winTimer = null;}
   $('wp').classList.remove('show');
 }
 
 function drawConfetti(){
   const cv=$('cf'),ctx=cv.getContext('2d');
-  cv.width=window.innerWidth;
-  cv.height=window.innerHeight;
-  const pts=Array.from({length:60},()=>({
-    x:Math.random()*cv.width,
-    y:Math.random()*cv.height-cv.height,
-    r:Math.random()*6+4,
-    d:Math.random()*2+1,
-    c:['#ff4d5a','#18b688','#fea84f','#b652ee','#3dbd78'][Math.floor(Math.random()*5)]
-  }));
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const pts=Array.from({length:60},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,r:Math.random()*6+4,d:Math.random()*2+1,c:['#ff4d5a','#18b688','#fea84f','#b652ee','#3dbd78'][Math.floor(Math.random()*5)]}));
   let frame=0;
   function render(){
     ctx.clearRect(0,0,cv.width,cv.height);
-    pts.forEach(p=>{
-      p.y+=p.d+2;
-      ctx.beginPath();
-      ctx.fillStyle=p.c;
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fill();
-    });
+    pts.forEach(p=>{p.y+=p.d+2;ctx.beginPath();ctx.fillStyle=p.c;ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();});
     frame++;
     if(frame<120)requestAnimationFrame(render);
     else ctx.clearRect(0,0,cv.width,cv.height);
@@ -1034,6 +942,7 @@ renderAll();
 tick();
 update30sMode();
 MODES.forEach((_,i)=>fetchMode(i));
+loadMyBets();
 
 setTimeout(autoSettleFromFirebase, 2000);
 setInterval(autoSettleFromFirebase, 8000);
