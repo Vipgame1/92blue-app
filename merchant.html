@@ -10,7 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Roboto,-apple-system,"Segoe UI",Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh;user-select:none}
+body{background:#cbcfd5;display:flex;justify-content:center;min-height:100vh}
 .app{width:100%;max-width:412px;background:#f2f3f4;position:relative;min-height:100vh;padding-bottom:30px;overflow:hidden}
 .top{background:linear-gradient(180deg,#2563eb 0%,#1d4ed8 100%);padding:18px 18px 70px;border-radius:0 0 30px 30px}
 .header{display:flex;justify-content:space-between;align-items:center;color:#fff}
@@ -333,25 +333,32 @@ function checkAndShowQr() {
 }
 
 // ==========================================
-// 💾 SAVE TO GALLERY (LONG PRESS MODAL)
+// 💾 SAVE TO GALLERY (BASE64 LONG PRESS FIX)
 // ==========================================
-function openSaveModal(url) {
-  // Try Direct download first (Works on Chrome/Web)
-  try {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = '92Blue_QR.png';
-    a.target = '_blank';
-    // If it's a standard browser, it will download. 
-    // But we always show the modal to ensure WebView users can save.
-  } catch(e) {}
-
-  // Show the Modal for Long Press (Guaranteed to work in APK)
+async function openSaveModal(url) {
+  toast("Loading image...");
   const modal = document.getElementById("imgSaveModal");
   const modalImg = document.getElementById("imgSaveModalImg");
-  modalImg.src = url;
-  modal.classList.add("show");
-  toast("📱 Long-press the image to save");
+  
+  try {
+    // Image ko fetch karke Base64 mein convert karein
+    // Isse APK mein Long-Press 100% kaam karega
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    
+    reader.onloadend = function() {
+      modalImg.src = reader.result; // Base64 Image
+      modal.classList.add("show");
+      toast("📱 Long-press the image to save");
+    };
+    reader.readAsDataURL(blob);
+  } catch (error) {
+    // Agar internet issue ho ya CORS block kare, toh direct URL set karein
+    modalImg.src = url;
+    modal.classList.add("show");
+    toast("📱 Long-press the image to save");
+  }
 }
 
 function startTimer() {
